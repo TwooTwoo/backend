@@ -29,6 +29,21 @@ jobs:
         shell: bash
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
+      - name: Write firebase-service-account.json into resources (for jar)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # 1) 리소스 디렉토리 생성
+          mkdir -p src/main/resources
+
+          # 2) GitHub Secret(base64) -> json 파일 생성
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_B64 }}" | base64 -d > src/main/resources/firebase-service-account.json
+
+          # 3) 권한 최소화 + 존재 확인(내용 출력 금지)
+          chmod 600 src/main/resources/firebase-service-account.json
+          ls -al src/main/resources/firebase-service-account.json
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
