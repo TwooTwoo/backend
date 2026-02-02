@@ -8,7 +8,11 @@ class User(
     @ManyToOne(fetch = FetchType.LAZY)
     val mentor: User? = null,
 
-    val role: UserRole
+    val role: UserRole,
+    @Column(nullable = false, unique = true)
+    val loginId: String,
+    @Column(nullable = false)
+    val password: String
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
