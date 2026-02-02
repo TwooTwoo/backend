@@ -1,14 +1,18 @@
-package goodspace.bllsoneshot.entity
+package goodspace.bllsoneshot.entity.user
 
 import jakarta.persistence.*
 
 @Entity
-class Worksheet(
+@Table(name = "users")
+class User(
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    val assignment: Assignment
+    val mentor: User? = null,
+
+    val role: UserRole
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
+
+    var refreshToken: String? = null
 }

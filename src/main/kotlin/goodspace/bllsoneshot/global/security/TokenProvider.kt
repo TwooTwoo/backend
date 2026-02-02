@@ -1,6 +1,6 @@
 package goodspace.bllsoneshot.global.security
 
-import goodspace.bllsoneshot.entity.UserRole
+import goodspace.bllsoneshot.entity.user.UserRole
 import io.jsonwebtoken.*
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
