@@ -31,8 +31,8 @@ jobs:
           echo "---- docker-compose.yml (first 80 lines) ----"
           sed -n '1,80p' docker-compose.yml
 
-      - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Login to GHCR (PAT)
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_ID }}" --password-stdin
 
       - name: Write .env, copy docker-compose.yml, deploy
         shell: bash
@@ -46,7 +46,7 @@ jobs:
           cp "${GITHUB_WORKSPACE}/docker-compose.yml" ./docker-compose.yml
 
           # latest 기준 이미지
-          IMAGE="ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest"
+          IMAGE="ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):${{ github.event.workflow_run.head_sha }}"
 
           cat > .env <<EOF
           APP_PORT=${{ secrets.APP_PORT }}
