@@ -42,6 +42,15 @@ class FileStorageService(
         }
     }
 
+    @Transactional
+    fun deleteFile(fileId: Long) {
+        val file = fileRepository.findById(fileId)
+            .orElseThrow { IllegalArgumentException("파일을 찾을 수 없습니다") }
+
+        fileRepository.delete(file)
+        deleteFromS3(file.objectKey)
+    }
+
     private fun uploadToS3(file: MultipartFile): UploadedFile {
         val objectKey = "worksheets/${UUID.randomUUID()}_${file.originalFilename}"
         val request = PutObjectRequest.builder()
