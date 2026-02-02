@@ -31,7 +31,8 @@ class AuthService(
 
         return LoginResult(
             accessToken = accessToken,
-            refreshToken = refreshToken
+            refreshToken = refreshToken,
+            role = user.role
         )
     }
 
