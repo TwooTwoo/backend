@@ -17,6 +17,8 @@ class CommentAnnotation(
     val proofShot: ProofShot,
 
     @Column(nullable = false)
+    val number: Int,
+    @Column(nullable = false)
     val xPercent: Double,
     @Column(nullable = false)
     val yPercent: Double

@@ -4,6 +4,7 @@ import goodspace.bllsoneshot.global.response.NO_CONTENT
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.task.dto.request.MenteeTaskCreateRequest
 import goodspace.bllsoneshot.task.dto.request.TaskCompleteUpdateRequest
+import goodspace.bllsoneshot.task.dto.response.TaskFeedbackResponse
 import jakarta.validation.Valid
 import goodspace.bllsoneshot.task.dto.response.TaskResponse
 import goodspace.bllsoneshot.task.service.TaskService
@@ -36,12 +37,17 @@ class TaskController(
         summary = "할 일 목록 조회(날짜 기준)",
         description = """
             해당 날짜의 할 일 목록을 조회합니다.
-            
+
+            [요청]
             date: 조회할 날짜(yyyy-MM-dd)
-            
-            createdBy: 할 일을 만든 사람(ROLE_MENTOR 혹은 ROLE_MENTEE)
+
+            [응답]
+            createdBy: 할 일을 만든 사람(ROLE_MENTOR / ROLE_MENTEE)
             subject: 과목(KOREAN, ENGLISH, MATH)
-            generalComment: 피드백(총평) 내용
+
+            [null 가능 속성]
+            generalComment: 피드백(총평) 미작성 시 null
+            actualMinutes: 실제 소요 시간 미기록 시 null
         """
     )
     fun getDailyTasks(
@@ -63,11 +69,6 @@ class TaskController(
         description = """
             멘티 권한으로 할 일을 추가합니다.
             생성된 할 일에 대한 정보를 응답합니다.
-            
-            taskName: 할 일 이름
-            goalMinutes: 목표 시간(분)
-            date: 할 일 날짜(yyyy-MM-dd)
-            subject: 과목(KOREAN, ENGLISH, MATH)
         """
     )
     fun addTask(
@@ -81,14 +82,41 @@ class TaskController(
         return ResponseEntity.ok(response)
     }
 
+    @GetMapping("/{taskId}")
+    @Operation(
+        summary = "피드백 조회",
+        description = """
+            ID를 기반으로 할 일의 피드백 정보를 조회합니다.
+            본인의 할 일에 대한 피드백만 조회할 수 있으며, 임시 저장 상태인 피드백은 조회되지 않습니다.
+
+            [null 가능 속성]
+            answer: 멘티 답변 미작성 시 null
+
+            [빈 문자열/빈 배열]
+            mentorName: 멘토 미배정 시 빈 문자열
+            generalComment: 총평 미작성 시 빈 문자열
+            proofShots, worksheets, columnLinks: 없으면 빈 배열
+        """
+    )
+    fun getTaskDetails(
+        principal: Principal,
+        @PathVariable taskId: Long,
+    ): ResponseEntity<TaskFeedbackResponse> {
+        val userId = principal.userId
+
+        val response = taskService.getTaskFeedback(userId, taskId)
+
+        return ResponseEntity.ok(response)
+    }
+
     @PatchMapping("/{taskId}")
     @Operation(
         summary = "할 일 완료 상태 수정",
         description = """
             할 일의 완료 상태를 변경합니다.
+            시간을 기록하지 않은 할 일은 완료할 수 없습니다.
             
             completed: 완료 여부(true/false)
-            시간을 기록하지 않은 할 일이라면 완료할 수 없습니다.
         """
     )
     fun updateCompleted(

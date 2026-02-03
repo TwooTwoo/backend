@@ -20,36 +20,50 @@ class UserInitializer(
     private val mentorLoginId: String,
     @Value("\${init.mentor.password:mentor123}")
     private val mentorPassword: String,
+    @Value("\${init.mentor.name:기본멘토}")
+    private val mentorName: String,
+
     @Value("\${init.mentee1.login-id:mentee1}")
     private val mentee1LoginId: String,
     @Value("\${init.mentee1.password:mentee1}")
     private val mentee1Password: String,
+    @Value("\${init.mentee1.name:기본멘티1}")
+    private val mentee1Name: String,
+
     @Value("\${init.mentee2.login-id:mentee2}")
     private val mentee2LoginId: String,
     @Value("\${init.mentee2.password:mentee2}")
-    private val mentee2Password: String
+    private val mentee2Password: String,
+    @Value("\${init.mentee2.name:기본멘티2}")
+    private val mentee2Name: String
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        initIfNotExists(mentorLoginId, mentorPassword, ROLE_MENTOR)
-        initIfNotExists(mentee1LoginId, mentee1Password, ROLE_MENTEE)
-        initIfNotExists(mentee2LoginId, mentee2Password, ROLE_MENTEE)
+        val mentor = initIfNotExists(mentorLoginId, mentorPassword, mentorName, ROLE_MENTOR)
+
+        initIfNotExists(mentee1LoginId, mentee1Password, mentee1Name, ROLE_MENTEE, mentor)
+        initIfNotExists(mentee2LoginId, mentee2Password, mentee2Name, ROLE_MENTEE, mentor)
     }
 
     private fun initIfNotExists(
         loginId: String,
         password: String,
-        role: UserRole
-    ) {
+        name: String,
+        role: UserRole,
+        mentor: User? = null
+    ): User? {
         if (userRepository.existsByLoginId(loginId)) {
-            return
+            return null
         }
 
         val user = User(
             loginId = loginId,
             password = passwordEncoder.encode(password)!!,
-            role = role
+            role = role,
+            name = name,
+            mentor = mentor
         )
-        userRepository.save(user)
+
+        return userRepository.save(user)
     }
 }

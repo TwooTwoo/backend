@@ -17,6 +17,8 @@ class User(
     @Column(nullable = false)
     val password: String,
 
+    @Column(nullable = false)
+    val name: String,
     val grade: String? = null
 ) : BaseEntity() {
     @OneToMany(mappedBy = "mentee", fetch = FetchType.LAZY)

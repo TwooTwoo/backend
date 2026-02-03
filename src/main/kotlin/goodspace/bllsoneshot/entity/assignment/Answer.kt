@@ -9,7 +9,7 @@ import jakarta.persistence.OneToOne
 
 @Entity
 class Answer(
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "answer", fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     val question: Comment,
 

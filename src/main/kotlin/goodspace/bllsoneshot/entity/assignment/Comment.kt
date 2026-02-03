@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Transient
 
 @Entity
 class Comment(
@@ -16,16 +17,53 @@ class Comment(
     @JoinColumn(nullable = false)
     val task: Task,
 
-    // TODO: ProofShot과 Annotation의 null 여부는 일치해야 함
+    @ManyToOne(fetch = FetchType.LAZY)
+    val proofShot: ProofShot,
     @OneToOne(fetch = FetchType.LAZY)
-    val proofShot: ProofShot?,
-    @OneToOne(fetch = FetchType.LAZY)
-    val commentAnnotation: CommentAnnotation?,
+    val commentAnnotation: CommentAnnotation,
+
+    @Column(nullable = false)
+    val content: String,
+    @Column(nullable = false)
+    val starred: Boolean,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val type: CommentType,
-
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val content: String,
-) : BaseEntity()
+    val registerStatus: RegisterStatus = RegisterStatus.REGISTERED
+) : BaseEntity() {
+
+    init {
+        // 멘티가 작성한 질문은 바로 읽음 처리
+        if (isQuestion) {
+            markAsRead()
+        }
+    }
+
+    @OneToOne(fetch = FetchType.LAZY)
+    var answer: Answer? = null
+
+    private var readByMentee: Boolean = false
+
+    @get:Transient
+    val isQuestion: Boolean
+        get() = type == CommentType.QUESTION
+
+    @get:Transient
+    val isFeedback: Boolean
+        get() = type == CommentType.FEEDBACK
+
+    @get:Transient
+    val isRegistered: Boolean
+        get() = registerStatus == RegisterStatus.REGISTERED
+
+    @get:Transient
+    val isRead: Boolean
+        get() = readByMentee
+
+    fun markAsRead() {
+        readByMentee = true
+    }
+}

@@ -67,4 +67,11 @@ class Task(
 
     fun hasProofShot(): Boolean =
         proofShots.isNotEmpty()
+
+    fun hasFeedback(): Boolean =
+        comments.any { it.isFeedback && it.isRegistered }
+
+    fun markFeedbackAsRead() {
+        comments.forEach { it.markAsRead() }
+    }
 }

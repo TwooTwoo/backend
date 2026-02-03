@@ -2,13 +2,15 @@ package goodspace.bllsoneshot.task.service
 
 import goodspace.bllsoneshot.entity.assignment.Task
 import goodspace.bllsoneshot.entity.user.UserRole
-import goodspace.bllsoneshot.global.exception.ExceptionMessage
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.*
+import goodspace.bllsoneshot.repository.task.ProofShotRepository
 import goodspace.bllsoneshot.repository.task.TaskRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.task.dto.request.MenteeTaskCreateRequest
 import goodspace.bllsoneshot.task.dto.request.TaskCompleteUpdateRequest
+import goodspace.bllsoneshot.task.dto.response.TaskFeedbackResponse
 import goodspace.bllsoneshot.task.dto.response.TaskResponse
+import goodspace.bllsoneshot.task.mapper.TaskFeedbackMapper
 import goodspace.bllsoneshot.task.mapper.TaskMapper
 import java.time.LocalDate
 import org.springframework.stereotype.Service
@@ -17,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TaskService(
     private val taskRepository: TaskRepository,
+    private val proofShotRepository: ProofShotRepository,
     private val userRepository: UserRepository,
-    private val taskMapper: TaskMapper
+    private val taskMapper: TaskMapper,
+    private val taskFeedbackMapper: TaskFeedbackMapper
 ) {
 
     fun findTasksByDate(
@@ -52,6 +56,19 @@ class TaskService(
     }
 
     @Transactional
+    fun getTaskFeedback(userId: Long, taskId: Long): TaskFeedbackResponse {
+        val task = taskRepository.findByIdWithMenteeAndGeneralCommentAndProofShots(taskId)
+            ?: throw IllegalArgumentException(TASK_NOT_FOUND.message)
+
+        validateTaskOwnership(task, userId)
+        validateHasFeedback(task)
+
+        task.markFeedbackAsRead()
+
+        return taskFeedbackMapper.map(task)
+    }
+
+    @Transactional
     fun updateCompleted(
         userId: Long,
         taskId: Long,
@@ -74,5 +91,9 @@ class TaskService(
         menteeId: Long
     ) {
         check(task.mentee.id == menteeId) { TASK_ACCESS_DENIED.message }
+    }
+
+    private fun validateHasFeedback(task: Task) {
+        check(task.hasFeedback()) { FEEDBACK_NOT_FOUND.message }
     }
 }

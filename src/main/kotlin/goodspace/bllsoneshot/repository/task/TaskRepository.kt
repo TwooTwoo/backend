@@ -16,4 +16,16 @@ interface TaskRepository : JpaRepository<Task, Long> {
         """
     )
     fun findByMenteeIdAndDate(userId: Long, date: LocalDate): List<Task>
+
+    @Query(
+        """
+        SELECT DISTINCT t FROM Task t
+        LEFT JOIN FETCH t.mentee m
+        LEFT JOIN FETCH m.mentor
+        LEFT JOIN FETCH t.generalComment
+        LEFT JOIN FETCH t.proofShots
+        WHERE t.id = :taskId
+        """
+    )
+    fun findByIdWithMenteeAndGeneralCommentAndProofShots(taskId: Long): Task?
 }
