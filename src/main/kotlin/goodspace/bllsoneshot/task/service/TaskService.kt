@@ -164,8 +164,8 @@ class TaskService(
                 val annotation = CommentAnnotation(
                     proofShot = proofShot,
                     number = index + 1,
-                    xPercent = question.xPercent.toDouble(),
-                    yPercent = question.yPercent.toDouble()
+                    percentX = question.percentX.toDouble(),
+                    percentY = question.percentY.toDouble()
                 )
                 val comment = Comment(
                     task = task,
