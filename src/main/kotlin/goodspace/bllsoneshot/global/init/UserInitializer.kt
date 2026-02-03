@@ -39,28 +39,31 @@ class UserInitializer(
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        initIfNotExists(mentorLoginId, mentorPassword, ROLE_MENTOR, mentorName)
-        initIfNotExists(mentee1LoginId, mentee1Password, ROLE_MENTEE, mentee1Name)
-        initIfNotExists(mentee2LoginId, mentee2Password, ROLE_MENTEE, mentee2Name)
+        val mentor = initIfNotExists(mentorLoginId, mentorPassword, mentorName, ROLE_MENTOR)
+
+        initIfNotExists(mentee1LoginId, mentee1Password, mentee1Name, ROLE_MENTEE, mentor)
+        initIfNotExists(mentee2LoginId, mentee2Password, mentee2Name, ROLE_MENTEE, mentor)
     }
 
     private fun initIfNotExists(
         loginId: String,
         password: String,
+        name: String,
         role: UserRole,
-        name: String
-    ) {
+        mentor: User? = null
+    ): User? {
         if (userRepository.existsByLoginId(loginId)) {
-            return
+            return null
         }
 
         val user = User(
             loginId = loginId,
             password = passwordEncoder.encode(password)!!,
             role = role,
-            name = name
+            name = name,
+            mentor = mentor
         )
 
-        userRepository.save(user)
+        return userRepository.save(user)
     }
 }
