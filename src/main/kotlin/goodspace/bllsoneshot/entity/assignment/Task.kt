@@ -4,6 +4,7 @@ import goodspace.bllsoneshot.entity.BaseEntity
 import goodspace.bllsoneshot.entity.user.User
 import goodspace.bllsoneshot.entity.user.UserRole
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.CANNOT_COMPLETE_WITHOUT_ACTUAL_MINUTES
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -21,11 +22,16 @@ class Task(
     @JoinColumn(nullable = false)
     val mentee: User,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    val mentor: User?,
+
     @Column(nullable = false)
     val name: String,
     // TODO: 마감일, 생성일이 동시에 null일 수 없도록 검증
     val startDate: LocalDate?,
     val dueDate: LocalDate?,
+        // 현재 목표 시간이 필수이므로 멘토가 할일 만들때도 반드시 목표시간을 설정해야함
     @Column(nullable = false)
     val goalMinutes: Int,
     val actualMinutes: Int?,
@@ -37,10 +43,11 @@ class Task(
     @Column(nullable = false)
     val createdBy: UserRole
 ) : BaseEntity() {
-    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    // Task 저장시 worksheets, columnLinks 도 DB에 저장하기 위해 CascadeType.PERSIST 추가, 삭제도 동일
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     val worksheets: MutableList<Worksheet> = mutableListOf()
 
-    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST, CascadeType.REMOVE])
     val columnLinks: MutableList<ColumnLink> = mutableListOf()
 
     @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
