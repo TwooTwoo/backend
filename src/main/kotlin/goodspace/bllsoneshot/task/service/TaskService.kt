@@ -35,7 +35,7 @@ class TaskService(
     }
 
     @Transactional
-    fun createTaskByMentor(mentorId: Long, request: MentorTaskCreateRequest): TaskResponse {
+    fun createTaskByMentor(mentorId: Long,request: MentorTaskCreateRequest): TaskResponse {
         val mentee: User = userRepository.findById(request.menteeId)
             .orElseThrow() { IllegalArgumentException(USER_NOT_FOUND.message) }
 
@@ -55,13 +55,11 @@ class TaskService(
             request.worksheets
                 // fileId가 null인 항목은 제거
                 .mapNotNull { it.fileId }
-                // 각 fileId로 Worksheet 엔티티 생성
-                .map { fileId ->
-                    Worksheet(
-                        task,
-                        fileRepository.findById(fileId)
-                            .orElseThrow({ IllegalArgumentException(FILE_NOT_FOUND.message) })
-                    )
+                .mapNotNull { fileId ->
+                    // 파일이 없으면 null
+                    val file = fileRepository.findById(fileId).orElse(null)
+                    // let은 file이 null이 아닐 때만 Worksheet 엔티티 생성
+                    file?.let { Worksheet(task, it) }
                 }
         )
         task.columnLinks.addAll(

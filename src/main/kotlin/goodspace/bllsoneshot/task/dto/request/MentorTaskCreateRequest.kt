@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.util.Collections.emptyList
 
 data class MentorTaskCreateRequest(
-    @field:NotBlank(message = "멘티ID가 비어 있습니다.")
     val menteeId: Long,
 
     val subject: Subject,
