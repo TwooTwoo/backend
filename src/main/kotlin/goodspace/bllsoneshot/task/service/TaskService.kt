@@ -8,7 +8,7 @@ import goodspace.bllsoneshot.repository.task.TaskRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.task.dto.request.MenteeTaskCreateRequest
 import goodspace.bllsoneshot.task.dto.request.TaskCompleteUpdateRequest
-import goodspace.bllsoneshot.task.dto.response.TaskFeedbackResponse
+import goodspace.bllsoneshot.task.dto.response.feedback.TaskFeedbackResponse
 import goodspace.bllsoneshot.task.dto.response.TaskResponse
 import goodspace.bllsoneshot.task.mapper.TaskFeedbackMapper
 import goodspace.bllsoneshot.task.mapper.TaskMapper

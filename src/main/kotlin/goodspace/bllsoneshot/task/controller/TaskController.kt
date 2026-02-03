@@ -4,7 +4,7 @@ import goodspace.bllsoneshot.global.response.NO_CONTENT
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.task.dto.request.MenteeTaskCreateRequest
 import goodspace.bllsoneshot.task.dto.request.TaskCompleteUpdateRequest
-import goodspace.bllsoneshot.task.dto.response.TaskFeedbackResponse
+import goodspace.bllsoneshot.task.dto.response.feedback.TaskFeedbackResponse
 import jakarta.validation.Valid
 import goodspace.bllsoneshot.task.dto.response.TaskResponse
 import goodspace.bllsoneshot.task.service.TaskService
