@@ -8,6 +8,10 @@ data class FeedbackResponse(
 
     val content: String,
     val starred: Boolean,
+    val registerStatus: RegisterStatus,
 
-    val registerStatus: RegisterStatus
+    val annotationId: Long,
+    val annotationNumber: Int,
+    val percentX: Double,
+    val percentY: Double
 )

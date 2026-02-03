@@ -5,5 +5,10 @@ data class QuestionResponse(
     val questionNumber: Int,
 
     val content: String,
-    val answer: String?
+    val answer: String?,
+
+    val annotationId: Long,
+    val annotationNumber: Int,
+    val percentX: Double,
+    val percentY: Double
 )

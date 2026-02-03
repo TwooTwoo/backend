@@ -7,8 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class ProofShotMapper(
     private val questionMapper: QuestionMapper,
-    private val feedbackMapper: FeedbackMapper,
-    private val commentAnnotationMapper: CommentAnnotationMapper
+    private val feedbackMapper: FeedbackMapper
 ) {
 
     fun map(proofShot: ProofShot): ProofShotResponse {
@@ -19,9 +18,7 @@ class ProofShotMapper(
             proofShotId = proofShot.id!!,
             imageFileId = proofShot.file.id!!,
             questions = questions.map { questionMapper.map(it) },
-            questionAnnotations = questions.map { commentAnnotationMapper.map(it.commentAnnotation) },
-            feedbacks = feedbacks.map { feedbackMapper.map(it) },
-            feedbackAnnotations = feedbacks.map { commentAnnotationMapper.map(it.commentAnnotation) }
+            feedbacks = feedbacks.map { feedbackMapper.map(it) }
         )
     }
 }

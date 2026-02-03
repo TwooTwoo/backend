@@ -5,8 +5,5 @@ data class ProofShotResponse(
     val imageFileId: Long,
 
     val questions: List<QuestionResponse>,
-    val questionAnnotations: List<CommentAnnotationResponse>,
-
-    val feedbacks: List<FeedbackResponse>,
-    val feedbackAnnotations: List<CommentAnnotationResponse>
+    val feedbacks: List<FeedbackResponse>
 )

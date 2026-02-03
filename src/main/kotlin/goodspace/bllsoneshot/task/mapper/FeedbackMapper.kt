@@ -8,12 +8,18 @@ import org.springframework.stereotype.Component
 class FeedbackMapper {
 
     fun map(comment: Comment): FeedbackResponse {
+        val annotation = comment.commentAnnotation
+
         return FeedbackResponse(
             feedbackId = comment.id!!,
-            feedbackNumber = comment.commentAnnotation.number,
+            feedbackNumber = annotation.number,
             content = comment.content,
             starred = comment.starred,
-            registerStatus = comment.registerStatus
+            registerStatus = comment.registerStatus,
+            annotationId = annotation.id!!,
+            annotationNumber = annotation.number,
+            percentX = annotation.percentX,
+            percentY = annotation.percentY
         )
     }
 }

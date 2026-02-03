@@ -8,11 +8,17 @@ import org.springframework.stereotype.Component
 class QuestionMapper {
 
     fun map(comment: Comment): QuestionResponse {
+        val annotation = comment.commentAnnotation
+
         return QuestionResponse(
             questionId = comment.id!!,
-            questionNumber = comment.commentAnnotation.number,
+            questionNumber = annotation.number,
             content = comment.content,
-            answer = comment.answer?.content
+            answer = comment.answer?.content,
+            annotationId = annotation.id!!,
+            annotationNumber = annotation.number,
+            percentX = annotation.percentX,
+            percentY = annotation.percentY
         )
     }
 }
