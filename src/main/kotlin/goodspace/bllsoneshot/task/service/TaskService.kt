@@ -46,7 +46,7 @@ class TaskService(
         val mentee: User = userRepository.findById(request.menteeId)
             .orElseThrow { IllegalArgumentException(USER_NOT_FOUND.message) }
 
-        validateDate(request.dates, request.startDate, request.dueDate)
+        validateDate(request.dates)
 
         val tasks = buildTasks(request, mentee)
         val savedTasks = taskRepository.saveAll(tasks)
@@ -62,8 +62,7 @@ class TaskService(
         val task = Task(
             mentee = mentee,
             name = request.taskName,
-            startDate = request.date,
-            dueDate = request.date,
+            date = request.date,
             goalMinutes = request.goalMinutes,
             subject = request.subject,
             createdBy = UserRole.ROLE_MENTEE
@@ -161,42 +160,37 @@ class TaskService(
     }
 
     private fun validateTaskCompletable(task: Task, currentDate: LocalDate) {
-        val startDate = task.startDate ?: return
+        val date = task.date ?: return
 
-        if (startDate.isAfter(currentDate)) {
+        if (date.isAfter(currentDate)) {
             throw IllegalStateException(CANNOT_COMPLETE_FUTURE_TASK.message)
         }
     }
 
     private fun validateDate(
         dates: List<LocalDate>,
-        startDate: LocalDate?,
-        dueDate: LocalDate?
     ) {
-        if (dates.isNotEmpty()) {
-            require(startDate == null && dueDate == null) {
-                DATE_RANGE_NOT_ALLOWED_WITH_DATES.message
-            }
-            return
+        require(dates.isNotEmpty()) {
+            DATES_REQUIRED.message
+        }
+        require(dates.size == dates.distinct().size) {
+            DUPLICATE_DATES_NOT_ALLOWED.message
         }
 
-        require(dueDate != null) {
-            START_OR_END_DATE_REQUIRED.message
-        }
-        if (startDate != null && dueDate != null) {
-            require(!startDate.isAfter(dueDate)) {
-                DATE_INVALID.message
-            }
+        val today = LocalDate.now()
+        // dates.none: 요소 하나라도 조건 불만족시 false
+        require(dates.none { it.isBefore(today) }) {
+            PAST_DATES_NOT_ALLOWED.message
         }
     }
 
     private fun buildTasks(request: MentorTaskCreateRequest, mentee: User): List<Task> {
-        if (request.dates.isEmpty()) {
+        // validate 에서 중복 검사를 마쳤으므로 .distinct() 불필요
+        return request.dates.map { date ->
             val task = Task(
                 mentee = mentee,
                 subject = request.subject,
-                startDate = request.startDate,
-                dueDate = request.dueDate,
+                date = date,
                 name = request.taskName,
                 goalMinutes = request.goalMinutes,
                 createdBy = UserRole.ROLE_MENTOR
@@ -214,35 +208,11 @@ class TaskService(
                     .mapNotNull { it.link?.takeIf { link -> link.isNotBlank() } }
                     .map { link -> ColumnLink(task, link) }
             )
-            return listOf(task)
-        }
-
-        return request.dates.distinct().map { date ->
-            val task = Task(
-                mentee = mentee,
-                subject = request.subject,
-                startDate = date,
-                dueDate = date,
-                name = request.taskName,
-                goalMinutes = request.goalMinutes,
-                createdBy = UserRole.ROLE_MENTOR
-            )
-            task.worksheets.addAll(
-                request.worksheets
-                    .mapNotNull { it.fileId }
-                    .mapNotNull { fileId ->
-                        val file = fileRepository.findById(fileId).orElse(null)
-                        file?.let { Worksheet(task, it) }
-                    }
-            )
-            task.columnLinks.addAll(
-                request.columnLinks
-                    .mapNotNull { it.link?.takeIf { link -> link.isNotBlank() } }
-                    .map { link -> ColumnLink(task, link) }
-            )
+            // TODO: 여기서 람다의 반환값으로 task를 반환하는 것 이해하기
             task
         }
     }
+
 
     private fun removeExistingProofShotsAndComments(task: Task) {
         task.comments.clear()

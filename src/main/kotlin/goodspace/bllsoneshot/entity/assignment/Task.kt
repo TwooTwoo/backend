@@ -4,16 +4,7 @@ import goodspace.bllsoneshot.entity.BaseEntity
 import goodspace.bllsoneshot.entity.user.User
 import goodspace.bllsoneshot.entity.user.UserRole
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.NEGATIVE_ACTUAL_MINUTES
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
+import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
@@ -26,8 +17,7 @@ class Task(
     @Column(nullable = false)
     val subject: Subject,
 
-    val startDate: LocalDate?,
-    val dueDate: LocalDate?,
+    val date: LocalDate? = null,
 
     @Column(nullable = false)
     val name: String,
