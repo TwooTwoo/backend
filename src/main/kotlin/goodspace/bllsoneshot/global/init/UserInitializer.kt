@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
+import org.springframework.core.io.ClassPathResource
 import org.springframework.transaction.annotation.Transactional
 
 @Component
@@ -41,10 +42,30 @@ class UserInitializer(
 
     @Transactional
     override fun run(args: ApplicationArguments) {
-        val mentor = initIfNotExists(mentorLoginId, mentorPassword, mentorName, ROLE_MENTOR)
+        val mentor = initIfNotExists(
+            loginId = mentorLoginId,
+            password = mentorPassword,
+            name = mentorName,
+            role = ROLE_MENTOR,
+            profileImage = MENTOR_PROFILE_IMAGE
+        )
 
-        initIfNotExists(mentee1LoginId, mentee1Password, mentee1Name, ROLE_MENTEE, mentor)
-        initIfNotExists(mentee2LoginId, mentee2Password, mentee2Name, ROLE_MENTEE, mentor)
+        initIfNotExists(
+            loginId = mentee1LoginId,
+            password = mentee1Password,
+            name = mentee1Name,
+            role = ROLE_MENTEE,
+            mentor = mentor,
+            profileImage = MENTEE1_PROFILE_IMAGE
+        )
+        initIfNotExists(
+            loginId = mentee2LoginId,
+            password = mentee2Password,
+            name = mentee2Name,
+            role = ROLE_MENTEE,
+            mentor = mentor,
+            profileImage = MENTEE2_PROFILE_IMAGE
+        )
     }
 
     private fun initIfNotExists(
@@ -52,7 +73,8 @@ class UserInitializer(
         password: String,
         name: String,
         role: UserRole,
-        mentor: User? = null
+        mentor: User? = null,
+        profileImage: ByteArray? = null
     ): User? {
         if (userRepository.existsByLoginId(loginId)) {
             return null
@@ -63,9 +85,19 @@ class UserInitializer(
             password = passwordEncoder.encode(password)!!,
             role = role,
             name = name,
-            mentor = mentor
+            mentor = mentor,
+            profileImage = profileImage
         )
 
         return userRepository.save(user)
+    }
+
+    companion object {
+        private val MENTOR_PROFILE_IMAGE: ByteArray by lazy { loadImage("professor.png") }
+        private val MENTEE1_PROFILE_IMAGE: ByteArray by lazy { loadImage("studentA.png") }
+        private val MENTEE2_PROFILE_IMAGE: ByteArray by lazy { loadImage("studentB.png") }
+
+        private fun loadImage(filename: String): ByteArray =
+            ClassPathResource(filename).inputStream.use { it.readBytes() }
     }
 }
