@@ -33,7 +33,7 @@ class MyPageService(
     fun getTotalLearningStatus(userId: Long, date: LocalDate): List<LearningStatusResponse> {
         val tasks = taskRepository.findCurrentTasks(userId, date)
 
-        return Subject.entries
+        return Subject.entriesExcludeResource()
             .map { learningStatusMapper.map(it, tasks) }
     }
 
