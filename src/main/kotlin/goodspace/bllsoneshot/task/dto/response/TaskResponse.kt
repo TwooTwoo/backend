@@ -2,14 +2,14 @@ package goodspace.bllsoneshot.task.dto.response
 
 import goodspace.bllsoneshot.entity.assignment.Subject
 import goodspace.bllsoneshot.entity.user.UserRole
+import java.time.LocalDate
 
 data class TaskResponse(
     val taskId: Long,
+    val taskSubject: Subject,
+    val taskDate: LocalDate?,
     val taskName: String,
-
     val createdBy: UserRole,
-    val subject: Subject,
-
     val completed: Boolean,
     val readFeedback: Boolean,
     val hasFeedback: Boolean,

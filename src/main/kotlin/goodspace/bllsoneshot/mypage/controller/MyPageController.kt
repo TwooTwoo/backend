@@ -86,8 +86,8 @@ class MyPageController(
             subject: 과목(KOREAN, ENGLISH, MATH)
             
             [응답]
-            todayTasks: 오늘(date)의 할 일 목록(마감일이 있고, 학습 시작일 ~ 마감일에 date가 포함되는 할 일)
-            historyTasks: 지난 할 일 목록(학습 마감일이 date 이전인 할 일, 학습 마감일이 없는 할 일)
+            todayTasks: 오늘(date)과 동일한 날짜의 할 일 목록
+            historyTasks: date 이전의 할 일 목록
         """
     )
     fun getLearningStatusBySubject(

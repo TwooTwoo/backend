@@ -39,7 +39,7 @@ class MyPageService(
 
     @Transactional(readOnly = true)
     fun getLearningStatusBySubject(userId: Long, subject: Subject, date: LocalDate): LearningHistoryResponse {
-        val todayTasks = taskRepository.findCurrentTasksDueDateExists(userId, date)
+        val todayTasks = taskRepository.findCurrentTasks(userId, date)
             .filter { it.subject == subject }
             .sortedWith(compareBy<Task> { it.completed }.thenByDescending { it.id })
 

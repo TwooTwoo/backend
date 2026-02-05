@@ -10,11 +10,10 @@ class TaskMapper {
     fun map(task: Task): TaskResponse {
         return TaskResponse(
             taskId = task.id!!,
+            taskSubject = task.subject,
+            taskDate = task.date,
             taskName = task.name,
-
             createdBy = task.createdBy,
-            subject = task.subject,
-
             completed = task.completed,
             readFeedback = task.hasReadAllFeedbacks(),
             hasFeedback = task.hasFeedback(),
