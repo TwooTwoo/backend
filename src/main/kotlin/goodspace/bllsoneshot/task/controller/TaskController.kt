@@ -215,11 +215,6 @@ class TaskController(
 
             [null 가능 속성]
             answer: 멘티 답변 미작성 시 null
-
-            [빈 문자열/빈 배열]
-            mentorName: 멘토 미배정 시 빈 문자열
-            generalComment: 총평 미작성 시 빈 문자열
-            proofShots, worksheets, columnLinks: 없으면 빈 배열
         """
     )
     fun getTaskFeedback(
