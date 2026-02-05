@@ -26,5 +26,6 @@ enum class ExceptionMessage(
     REPORT_DATE_INVALID("시작일은 종료일 이후일 수 없습니다."),
     REPORT_CONTENT_REQUIRED("총평, 잘한 점, 보완할 점은 최소 1개 이상입니다."),
     REPORT_CONTENT_CANNOT_BLANK("총평, 잘한 점, 보완할 점은 공백일 수 없습니다."),
-    REPORT_SUBJECT_INVALID("리포트에 사용할 수 없는 과목입니다.")
+    REPORT_SUBJECT_INVALID("리포트에 사용할 수 없는 과목입니다."),
+    REPORT_NOT_FOUND("학습 리포트를 찾을 수 없습니다.")
 }

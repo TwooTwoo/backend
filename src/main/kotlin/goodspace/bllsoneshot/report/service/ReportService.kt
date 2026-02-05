@@ -23,8 +23,7 @@ class ReportService(
 
     @Transactional
     fun createLearningReport(mentorId: Long, menteeId: Long, request: ReportCreateRequest): ReportResponse {
-        val mentee = userRepository.findById(menteeId)
-            .orElseThrow { IllegalArgumentException(ExceptionMessage.USER_NOT_FOUND.message) }
+        val mentee = findUserBy(menteeId)
 
         validateAssignedMentee(mentorId, mentee)
         validateReportDuplicate(menteeId, request.subject, request.startDate, request.endDate)
@@ -42,6 +41,33 @@ class ReportService(
         )
 
         return reportMapper.map(report)
+    }
+
+    @Transactional(readOnly = true)
+    fun getReport(
+        mentorId: Long,
+        menteeId: Long,
+        subject: Subject,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): ReportResponse {
+        val mentee = findUserBy(menteeId)
+
+        validateAssignedMentee(mentorId, mentee)
+
+        val report = learningReportRepository.findByMenteeIdAndSubjectAndStartDateAndEndDate(
+            menteeId = menteeId,
+            subject = subject,
+            startDate = startDate,
+            endDate = endDate
+        ) ?: throw IllegalArgumentException(ExceptionMessage.REPORT_NOT_FOUND.message)
+
+        return reportMapper.map(report)
+    }
+
+    private fun findUserBy(userId: Long): User {
+        return userRepository.findById(userId)
+            .orElseThrow { IllegalArgumentException(ExceptionMessage.USER_NOT_FOUND.message) }
     }
 
     private fun validateAssignedMentee(

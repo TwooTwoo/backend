@@ -24,4 +24,11 @@ interface LearningReportRepository : JpaRepository<LearningReport, Long> {
         startDate: LocalDate,
         endDate: LocalDate
     ): Boolean
+
+    fun findByMenteeIdAndSubjectAndStartDateAndEndDate(
+        menteeId: Long,
+        subject: Subject,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): LearningReport?
 }

@@ -1,5 +1,6 @@
 package goodspace.bllsoneshot.report.controller
 
+import goodspace.bllsoneshot.entity.assignment.Subject
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
 import goodspace.bllsoneshot.report.dto.response.ReportResponse
@@ -8,12 +9,16 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import java.security.Principal
+import java.time.LocalDate
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -25,7 +30,7 @@ class ReportController(
     private val reportService: ReportService
 ) {
 
-    @PostMapping("/{menteeId}")
+    @PostMapping("mentee/{menteeId}")
     @Operation(
         summary = "학습 리포트 발행",
         description = """
@@ -55,5 +60,41 @@ class ReportController(
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(response)
+    }
+
+    @GetMapping("mentee/{menteeId}/subjects/{subject}")
+    @Operation(
+        summary = "학습 리포트 조회(멘토)",
+        description = """
+            작성된 학습 리포트의 내용을 조회합니다.
+            
+            담당 멘티의 학습 리포트만 조회할 수 있습니다.
+            
+            [요청]
+            subject: 과목(KOREAN, ENGLISH, MATH)
+            startDate: 리포트 시작일(yyyy-MM-dd)
+            endDate: 리포트 종료일(yyyy-MM-dd)
+            
+            [응답]
+            subject: 과목(KOREAN, ENGLISH, MATH)
+            startDate: 리포트 시작일
+            endDate: 리포트 종료일
+            generalComment: 총평
+            goodPoints: 잘한 점 목록
+            badPoints: 보완할 점 목록
+        """
+    )
+    fun getReport(
+        principal: Principal,
+        @PathVariable menteeId: Long,
+        @PathVariable subject: Subject,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
+    ): ResponseEntity<ReportResponse> {
+        val mentorId = principal.userId
+
+        val response = reportService.getReport(mentorId, menteeId, subject, startDate, endDate)
+
+        return ResponseEntity.ok(response)
     }
 }
