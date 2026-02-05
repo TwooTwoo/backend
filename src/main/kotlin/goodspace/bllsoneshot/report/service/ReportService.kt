@@ -8,6 +8,7 @@ import goodspace.bllsoneshot.global.exception.ExceptionMessage
 import goodspace.bllsoneshot.repository.user.LearningReportRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
+import goodspace.bllsoneshot.report.dto.response.ReportAmountResponse
 import goodspace.bllsoneshot.report.dto.response.ReportExistsResponse
 import goodspace.bllsoneshot.report.dto.response.ReportResponse
 import goodspace.bllsoneshot.report.mapper.ReportExistsMapper
@@ -102,6 +103,13 @@ class ReportService(
         ) ?: throw IllegalArgumentException(ExceptionMessage.REPORT_NOT_FOUND.message)
 
         return reportMapper.map(report)
+    }
+
+    @Transactional(readOnly = true)
+    fun getReceivedReportAmount(menteeId: Long, date: LocalDate): ReportAmountResponse {
+        val count = learningReportRepository.countByMenteeIdContainingDate(menteeId, date)
+
+        return ReportAmountResponse(amount = count.toInt())
     }
 
     private fun findUserBy(userId: Long): User {

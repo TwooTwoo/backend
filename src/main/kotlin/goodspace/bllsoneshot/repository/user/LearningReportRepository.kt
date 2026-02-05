@@ -45,4 +45,13 @@ interface LearningReportRepository : JpaRepository<LearningReport, Long> {
         subject: Subject,
         date: LocalDate
     ): LearningReport?
+
+    @Query(
+        """
+        SELECT COUNT(r) FROM LearningReport r
+        WHERE r.mentee.id = :menteeId
+        AND :date BETWEEN r.startDate AND r.endDate
+        """
+    )
+    fun countByMenteeIdContainingDate(menteeId: Long, date: LocalDate): Long
 }

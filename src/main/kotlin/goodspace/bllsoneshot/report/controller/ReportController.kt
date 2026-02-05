@@ -3,6 +3,7 @@ package goodspace.bllsoneshot.report.controller
 import goodspace.bllsoneshot.entity.assignment.Subject
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
+import goodspace.bllsoneshot.report.dto.response.ReportAmountResponse
 import goodspace.bllsoneshot.report.dto.response.ReportExistsResponse
 import goodspace.bllsoneshot.report.dto.response.ReportResponse
 import goodspace.bllsoneshot.report.service.ReportService
@@ -126,6 +127,28 @@ class ReportController(
         return ResponseEntity.ok(response)
     }
 
+    @GetMapping("/mentee/me/amount")
+    @Operation(
+        summary = "학습 리포트 개수 조회(멘티)",
+        description = """
+            멘토가 본인(멘티)에게 작성해준 학습 리포트의 개수를 조회합니다.
+            날짜에 해당하는 학습 리포트를 조회합니다.
+            
+            [요청]
+            date: 날짜(yyyy-MM-dd)
+        """
+    )
+    fun getReceivedReportAmount(
+        principal: Principal,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate
+    ): ResponseEntity<ReportAmountResponse> {
+        val menteeId = principal.userId
+
+        val response = reportService.getReceivedReportAmount(menteeId, date)
+
+        return ResponseEntity.ok(response)
+    }
+
     @GetMapping("mentee/me/subjects/{subject}")
     @Operation(
         summary = "학습 리포트 조회(멘티)",
@@ -135,7 +158,7 @@ class ReportController(
             
             [요청]
             subject: 과목(KOREAN, ENGLISH, MATH)
-            date: 날짜
+            date: 날짜(yyyy-MM-dd)
             
             [응답]
             subject: 과목(KOREAN, ENGLISH, MATH)
