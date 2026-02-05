@@ -20,5 +20,7 @@ enum class ExceptionMessage(
     NEGATIVE_ACTUAL_MINUTES("학습 시간은 음수일 수 없습니다."),
     DATES_REQUIRED("날짜는 최소 1개 이상 선택해야 합니다."),
     DUPLICATE_DATES_NOT_ALLOWED("중복된 날짜는 선택할 수 없습니다."),
-    PAST_DATES_NOT_ALLOWED("과거 날짜는 선택할 수 없습니다.")
+    PAST_DATES_NOT_ALLOWED("과거 날짜는 선택할 수 없습니다."),
+    RESOURCE_SUBJECT_INVALID("자료 과목은 KOREAN, ENGLISH, MATH 중 하나여야 합니다."),
+    RESOURCE_ACCESS_DENIED("해당 멘티의 자료에 대한 권한이 없습니다.")
 }
