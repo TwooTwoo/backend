@@ -1,0 +1,59 @@
+package goodspace.bllsoneshot.report.controller
+
+import goodspace.bllsoneshot.global.security.userId
+import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
+import goodspace.bllsoneshot.report.dto.response.ReportResponse
+import goodspace.bllsoneshot.report.service.ReportService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
+import java.security.Principal
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/reports")
+@Tag(
+    name = "학습리포트 API"
+)
+class ReportController(
+    private val reportService: ReportService
+) {
+
+    @PostMapping("/{menteeId}")
+    @Operation(
+        summary = "학습 리포트 발행",
+        description = """
+            학습 리포트를 새로 생성합니다.
+            
+            담당 멘티의 학습 리포트만 생성할 수 있습니다.
+            시작일/종료일/과목이 같은 학습 리포트는, 한 멘티에 여럿 생성할 수 없습니다.
+            총평, 잘한 점, 보완할 점은 최소 1개 이상 존재해야 하며, 공백일 수 없습니다.
+            
+            [요청]
+            subject: 과목(KOREAN, ENGLISH, MATH)
+            startDate: 리포트 시작일
+            endDate: 리포트 종료일
+            generalComment: 총평
+            goodPoints: 잘한 점 목록
+            badPoints: 보완할 점 목록
+        """
+    )
+    fun createLearningReport(
+        principal: Principal,
+        @PathVariable menteeId: Long,
+        @Valid @RequestBody request: ReportCreateRequest
+    ): ResponseEntity<ReportResponse> {
+        val mentorId = principal.userId
+
+        val response = reportService.createLearningReport(mentorId, menteeId, request)
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(response)
+    }
+}
