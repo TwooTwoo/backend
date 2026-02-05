@@ -70,6 +70,10 @@ jobs:
             "CLOUD_AWS_BUCKET=${{ secrets.CLOUD_AWS_BUCKET }}" \
             "CLOUD_AWS_CDN_URL=${{ secrets.CLOUD_AWS_CDN_URL }}" \
             "" \
+            "SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=${{ secrets.SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE }}" \
+            "SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=${{ secrets.SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE }}" \
+            "APP_FILE_MAX_BYTES=${{ secrets.APP_FILE_MAX_BYTES }}" \
+            "" \
             "CF_TUNNEL_TOKEN=${{ secrets.CF_TUNNEL_TOKEN }}" \
             "APP_IMAGE=$IMAGE" \
             > .env

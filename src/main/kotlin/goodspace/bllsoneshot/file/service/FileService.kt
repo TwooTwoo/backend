@@ -23,11 +23,11 @@ class FileService(
     private val s3Client: S3Client,
     private val fileRepository: FileRepository,
     private val s3Presigner: S3Presigner,
-    @Value("\${aws.s3.bucket}") private val bucket: String
+    @Value("\${aws.s3.bucket}") private val bucket: String,
+    @Value("\${app.file.max-bytes}") private val maxBytes: Long
 ) {
     companion object {
         private val ALLOWED_TYPES = setOf("image/png", "image/jpeg", "application/pdf")
-        private const val MAX_BYTES = 10L * 1024 * 1024 // 10MB
         private val logger = KotlinLogging.logger {}
     }
 
@@ -82,7 +82,7 @@ class FileService(
     private fun validateFile(file: MultipartFile) {
         require(!file.isEmpty) { "파일이 비어 있습니다." }
         require(file.contentType in ALLOWED_TYPES) { "지원하지 않는 파일 타입입니다." }
-        require(file.size <= MAX_BYTES) { "파일 용량이 너무 큽니다." }
+        require(file.size <= maxBytes) { "파일 용량이 너무 큽니다." }
     }
 
     private fun uploadToS3(file: MultipartFile, folder: String): UploadedFile {

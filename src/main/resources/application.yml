@@ -15,10 +15,17 @@ app:
       path: /api/auth
       secure: ${REFRESH_TOKEN_COOKIE_SECURE:false}
       same-site: lax
+  file:
+    max-bytes: ${APP_FILE_MAX_BYTES}
 
 spring:
   application:
     name: bllsoneshot
+
+  servlet:
+    multipart:
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE}
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}
