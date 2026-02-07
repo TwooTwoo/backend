@@ -20,5 +20,8 @@ enum class ExceptionMessage(
     NEGATIVE_ACTUAL_MINUTES("학습 시간은 음수일 수 없습니다."),
     DATES_REQUIRED("날짜는 최소 1개 이상 선택해야 합니다."),
     DUPLICATE_DATES_NOT_ALLOWED("중복된 날짜는 선택할 수 없습니다."),
-    PAST_DATES_NOT_ALLOWED("과거 날짜는 선택할 수 없습니다.")
+    PAST_DATES_NOT_ALLOWED("과거 날짜는 선택할 수 없습니다."),
+    TASK_NAMES_REQUIRED("할 일 이름은 최소 1개 이상이어야 합니다."),
+    TASK_NAME_BLANK("할 일 이름이 비어 있습니다."),
+    TASK_NAME_TOO_LONG("할 일 이름은 50자를 초과할 수 없습니다.")
 }

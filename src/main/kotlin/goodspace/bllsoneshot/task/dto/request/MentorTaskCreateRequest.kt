@@ -1,7 +1,7 @@
 package goodspace.bllsoneshot.task.dto.request
 
 import goodspace.bllsoneshot.entity.assignment.Subject
-import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Positive
 import java.time.LocalDate
 import java.util.Collections.emptyList
@@ -11,8 +11,8 @@ data class MentorTaskCreateRequest(
 
     val subject: Subject,
     val dates: List<LocalDate> = emptyList(),
-    @field:NotBlank(message = "할 일 이름이 비어 있습니다.")
-    val taskName: String,
+    @field:NotEmpty(message = "할 일 이름은 최소 1개 이상이어야 합니다.")
+    val taskNames: List<String>,
     @field:Positive(message = "목표 시간은 1분 이상이어야 합니다.")
     val goalMinutes: Int,
 

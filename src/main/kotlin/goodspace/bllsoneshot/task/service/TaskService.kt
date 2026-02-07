@@ -50,6 +50,7 @@ class TaskService(
             .orElseThrow { IllegalArgumentException(USER_NOT_FOUND.message) }
 
         validateDate(request.dates)
+        validateTaskNames(request.taskNames)
 
         val tasks = buildTasks(request, mentee)
         val savedTasks = taskRepository.saveAll(tasks)
@@ -167,6 +168,20 @@ class TaskService(
         }
     }
 
+    private fun validateTaskNames(taskNames: List<String>) {
+        require(taskNames.isNotEmpty()) {
+            TASK_NAMES_REQUIRED.message
+        }
+        taskNames.forEach { name ->
+            require(name.isNotBlank()) {
+                TASK_NAME_BLANK.message
+            }
+            require(name.length <= MAX_TASK_NAME_LENGTH) {
+                TASK_NAME_TOO_LONG.message
+            }
+        }
+    }
+
     private fun validateDate(
         dates: List<LocalDate>,
     ) {
@@ -185,31 +200,32 @@ class TaskService(
     }
 
     private fun buildTasks(request: MentorTaskCreateRequest, mentee: User): List<Task> {
-        // validate 에서 중복 검사를 마쳤으므로 .distinct() 불필요
-        return request.dates.map { date ->
-            val task = Task(
-                mentee = mentee,
-                subject = request.subject,
-                date = date,
-                name = request.taskName,
-                goalMinutes = request.goalMinutes,
-                createdBy = UserRole.ROLE_MENTOR
-            )
-            task.worksheets.addAll(
-                request.worksheets
-                    .mapNotNull { it.fileId }
-                    .mapNotNull { fileId ->
-                        val file = fileRepository.findById(fileId).orElse(null)
-                        file?.let { Worksheet(task, it) }
-                    }
-            )
-            task.columnLinks.addAll(
-                request.columnLinks
-                    .mapNotNull { it.link?.takeIf { link -> link.isNotBlank() } }
-                    .map { link -> ColumnLink(task, link) }
-            )
-            // TODO: 여기서 람다의 반환값으로 task를 반환하는 것 이해하기
-            task
+        // dates × taskNames 조합으로 각각의 Task 생성
+        return request.dates.flatMap { date ->
+            request.taskNames.map { taskName ->
+                val task = Task(
+                    mentee = mentee,
+                    subject = request.subject,
+                    date = date,
+                    name = taskName,
+                    goalMinutes = request.goalMinutes,
+                    createdBy = UserRole.ROLE_MENTOR
+                )
+                task.worksheets.addAll(
+                    request.worksheets
+                        .mapNotNull { it.fileId }
+                        .mapNotNull { fileId ->
+                            val file = fileRepository.findById(fileId).orElse(null)
+                            file?.let { Worksheet(task, it) }
+                        }
+                )
+                task.columnLinks.addAll(
+                    request.columnLinks
+                        .mapNotNull { it.link?.takeIf { link -> link.isNotBlank() } }
+                        .map { link -> ColumnLink(task, link) }
+                )
+                task
+            }
         }
     }
 
@@ -276,5 +292,9 @@ class TaskService(
 
     private fun validateUpdatableByMentee(task: Task) {
         check(task.createdBy == UserRole.ROLE_MENTEE) { CANNOT_UPDATE_MENTOR_CREATED_TASK.message }
+    }
+
+    companion object {
+        private const val MAX_TASK_NAME_LENGTH = 50
     }
 }
