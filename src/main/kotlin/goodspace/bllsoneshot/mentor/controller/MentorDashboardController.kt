@@ -1,7 +1,8 @@
 package goodspace.bllsoneshot.mentor.controller
 
 import goodspace.bllsoneshot.global.security.userId
-import goodspace.bllsoneshot.mentor.dto.response.FeebackRequiredTaskSummaryResponse
+import goodspace.bllsoneshot.mentor.dto.response.FeedbackRequiredTaskSummaryResponse
+import goodspace.bllsoneshot.mentor.dto.response.MenteeManagementSummaryResponse
 import goodspace.bllsoneshot.mentor.dto.response.TaskUnfinishedSummaryResponse
 import goodspace.bllsoneshot.mentor.service.MentorDashboardService
 import io.swagger.v3.oas.annotations.Operation
@@ -42,7 +43,7 @@ class MentorDashboardController(
     fun getFeedbackRequiredTasks(
         principal: Principal,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate
-    ): ResponseEntity<FeebackRequiredTaskSummaryResponse> {
+    ): ResponseEntity<FeedbackRequiredTaskSummaryResponse> {
         val mentorId = principal.userId
         val response = mentorDashboardService.getFeedbackRequiredTasks(mentorId, date)
         return ResponseEntity.ok(response)
@@ -59,11 +60,9 @@ class MentorDashboardController(
             date: 기준 날짜(yyyy-MM-dd)
             
             [응답]
+            taskCount: 업로드 미제출 과제 건수
             menteeCount: 업로드 미제출 멘티 수
             menteeNames: 업로드 미제출 멘티 이름 목록
-            mentees: 멘티 목록
-              - menteeId: 멘티 ID
-              - menteeName: 멘티 이름
         """
     )
     fun getTaskUnfinishedMentees(
@@ -72,6 +71,31 @@ class MentorDashboardController(
     ): ResponseEntity<TaskUnfinishedSummaryResponse> {
         val mentorId = principal.userId
         val response = mentorDashboardService.getTaskUnfinishedMentees(mentorId, date)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/mentees")
+    @Operation(
+        summary = "멘티 관리 리스트 조회",
+        description = """
+            멘토가 담당하는 전체 멘티의 관리 정보를 조회합니다.
+            
+            [요청]
+            date: 기준 날짜(yyyy-MM-dd) — 제출 상태 판단 기준일
+
+            [응답]
+            totalMenteeCount: 전체 멘티 수
+            submittedMenteeCount: 제출 완료 멘티 수
+            notSubmittedMenteeCount: 미제출 멘티 수
+            mentees: 멘티 상세 목록 리스트
+        """
+    )
+    fun getMenteeManagementList(
+        principal: Principal,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate
+    ): ResponseEntity<MenteeManagementSummaryResponse> {
+        val mentorId = principal.userId
+        val response = mentorDashboardService.getMenteeManagementList(mentorId, date)
         return ResponseEntity.ok(response)
     }
 }

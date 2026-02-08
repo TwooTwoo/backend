@@ -1,6 +1,6 @@
 package goodspace.bllsoneshot.mentor.dto.response
 
-data class FeebackRequiredTaskSummaryResponse(
+data class FeedbackRequiredTaskSummaryResponse(
     val taskCount: Long,
     val menteeNames: List<String>
 )
