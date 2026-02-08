@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import jakarta.persistence.Transient
 
 @Entity
@@ -20,8 +21,8 @@ class Comment(
 
     @ManyToOne(fetch = FetchType.LAZY)
     val proofShot: ProofShot,
-    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
-    val commentAnnotation: CommentAnnotation,
+    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val annotation: CommentAnnotation,
 
     @Column(nullable = false)
     val content: String,
@@ -43,7 +44,7 @@ class Comment(
         }
     }
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     var answer: Answer? = null
 
     private var readByMentee: Boolean = false

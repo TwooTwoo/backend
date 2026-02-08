@@ -19,7 +19,7 @@ class ProofShot(
     @JoinColumn(nullable = false)
     val file: File
 ) : BaseEntity() {
-    @OneToMany(mappedBy = "proofShot", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "proofShot", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val comments: MutableList<Comment> = mutableListOf()
 
     @get:Transient

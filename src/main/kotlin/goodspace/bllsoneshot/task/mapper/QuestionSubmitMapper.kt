@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class QuestionSubmitMapper {
 
     fun map(comment: Comment): QuestionSubmitResponse {
-        val annotation = comment.commentAnnotation
+        val annotation = comment.annotation
 
         return QuestionSubmitResponse(
             number = annotation.number,

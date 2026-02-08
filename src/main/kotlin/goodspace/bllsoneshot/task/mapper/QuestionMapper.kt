@@ -12,10 +12,10 @@ class QuestionMapper(
     fun map(comment: Comment): QuestionResponse {
         return QuestionResponse(
             questionId = comment.id!!,
-            questionNumber = comment.commentAnnotation.number,
+            questionNumber = comment.annotation.number,
             content = comment.content,
             answer = comment.answer?.content,
-            annotation = commentAnnotationMapper.map(comment.commentAnnotation)
+            annotation = commentAnnotationMapper.map(comment.annotation)
         )
     }
 }

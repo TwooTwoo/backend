@@ -12,11 +12,11 @@ class FeedbackMapper(
     fun map(comment: Comment): FeedbackResponse {
         return FeedbackResponse(
             feedbackId = comment.id!!,
-            feedbackNumber = comment.commentAnnotation.number,
+            feedbackNumber = comment.annotation.number,
             content = comment.content,
             starred = comment.starred,
             registerStatus = comment.registerStatus,
-            annotation = commentAnnotationMapper.map(comment.commentAnnotation)
+            annotation = commentAnnotationMapper.map(comment.annotation)
         )
     }
 }

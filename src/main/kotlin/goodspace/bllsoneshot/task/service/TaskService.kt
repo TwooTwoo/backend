@@ -3,7 +3,6 @@ package goodspace.bllsoneshot.task.service
 import goodspace.bllsoneshot.entity.assignment.*
 import goodspace.bllsoneshot.entity.user.User
 import goodspace.bllsoneshot.entity.user.UserRole
-import goodspace.bllsoneshot.global.exception.ExceptionMessage
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.*
 import goodspace.bllsoneshot.repository.file.FileRepository
 import goodspace.bllsoneshot.repository.task.TaskRepository
@@ -268,7 +267,6 @@ class TaskService(
 
             for ((index, question) in proofShotRequest.questions.withIndex()) {
                 val annotation = CommentAnnotation(
-                    proofShot = proofShot,
                     number = index + 1,
                     percentX = question.percentX,
                     percentY = question.percentY
@@ -276,12 +274,11 @@ class TaskService(
                 val comment = Comment(
                     task = task,
                     proofShot = proofShot,
-                    commentAnnotation = annotation,
+                    annotation = annotation,
                     content = question.content,
                     type = CommentType.QUESTION,
                     registerStatus = RegisterStatus.REGISTERED
                 )
-                annotation.comment = comment
 
                 proofShot.comments.add(comment)
                 task.comments.add(comment)

@@ -11,7 +11,7 @@ class ProofShotSubmitMapper(
 
     fun map(proofShot: ProofShot): ProofShotSubmitResponse {
         val questions = proofShot.questComments
-            .sortedBy { it.commentAnnotation.number }
+            .sortedBy { it.annotation.number }
             .map { questionSubmitMapper.map(it) }
 
         return ProofShotSubmitResponse(
