@@ -168,4 +168,15 @@ interface TaskRepository : JpaRepository<Task, Long> {
         """
     )
     fun findResourcesByMenteeId(menteeId: Long): List<Task>
+
+    @Query(
+        """
+        SELECT t FROM Task t
+        JOIN FETCH t.mentee m
+        LEFT JOIN FETCH m.mentor
+        WHERE t.id = :resourceId
+        AND t.isResource = true
+        """
+    )
+    fun findResourceByIdWithMentee(resourceId: Long): Task?
 }
