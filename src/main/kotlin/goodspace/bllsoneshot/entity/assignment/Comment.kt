@@ -33,7 +33,7 @@ class Comment(
     val type: CommentType,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val registerStatus: RegisterStatus = RegisterStatus.REGISTERED
+    val registerStatus: RegisterStatus = RegisterStatus.CONFIRMED
 ) : BaseEntity() {
 
     init {
@@ -57,8 +57,8 @@ class Comment(
         get() = type == CommentType.FEEDBACK
 
     @get:Transient
-    val isRegistered: Boolean
-        get() = registerStatus == RegisterStatus.REGISTERED
+    val isConfirmed: Boolean
+        get() = registerStatus == RegisterStatus.CONFIRMED
 
     @get:Transient
     val isRead: Boolean

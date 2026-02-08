@@ -30,7 +30,7 @@ class MentorDashboardService(
             mentorId = mentorId,
             date = date,
             feedbackType = CommentType.FEEDBACK,
-            registeredStatus = RegisterStatus.REGISTERED
+            confirmedStatus = RegisterStatus.CONFIRMED
         )
 
         return FeedbackRequiredTaskSummaryResponse(

@@ -267,7 +267,7 @@ class TaskController(
             annotation: 이미지 위에 표시되는 주석
             percentX: 주석이 이미지 좌측에서부터 몇 % 떨어진 곳에 있는지 수치
             percentY: 주석이 이미지 상단에서부터 몇 % 떨어진 곳에 있는지 수치
-            registerStatus: 피드백 등록 상태(TEMPORARY, REGISTERED)
+            registerStatus: 피드백 저장 상태(TEMPORARY, CONFIRMED)
         """
     )
     fun getTaskFeedback(

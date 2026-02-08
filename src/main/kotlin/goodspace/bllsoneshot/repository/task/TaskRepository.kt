@@ -84,7 +84,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
             FROM Comment c
             WHERE c.task = t
               AND c.type = :feedbackType
-              AND c.registerStatus = :registeredStatus
+              AND c.registerStatus = :confirmedStatus
         )
         GROUP BY m.id, m.name
         """
@@ -93,7 +93,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
         mentorId: Long,
         date: LocalDate,
         feedbackType: CommentType,
-        registeredStatus: RegisterStatus
+        confirmedStatus: RegisterStatus
     ): List<FeedbackRequiredTaskResponse>
 
     @Query(

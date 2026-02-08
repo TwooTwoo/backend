@@ -69,14 +69,14 @@ class Task(
         proofShots.isNotEmpty()
 
     fun hasFeedback(): Boolean =
-        comments.any { it.isFeedback && it.isRegistered }
+        comments.any { it.isFeedback && it.isConfirmed }
 
     fun hasReadAllFeedbacks(): Boolean {
         if (!hasFeedback()) {
             return true
         }
 
-        return comments.filter { it.isFeedback && it.isRegistered }
+        return comments.filter { it.isFeedback && it.isConfirmed }
             .all { it.isRead }
     }
 

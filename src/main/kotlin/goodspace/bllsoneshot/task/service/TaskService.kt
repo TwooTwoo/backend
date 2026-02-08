@@ -279,7 +279,7 @@ class TaskService(
                     commentAnnotation = annotation,
                     content = question.content,
                     type = CommentType.QUESTION,
-                    registerStatus = RegisterStatus.REGISTERED
+                    registerStatus = RegisterStatus.CONFIRMED
                 )
                 annotation.comment = comment
 
