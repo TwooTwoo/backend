@@ -33,5 +33,9 @@ enum class ExceptionMessage(
     REPORT_SUBJECT_INVALID("리포트에 사용할 수 없는 과목입니다."),
     REPORT_NOT_FOUND("학습 리포트를 찾을 수 없습니다."),
     RESOURCE_SUBJECT_INVALID("자료 과목은 KOREAN, ENGLISH, MATH 중 하나여야 합니다."),
-    RESOURCE_ACCESS_DENIED("해당 멘티의 자료에 대한 권한이 없습니다.")
+    RESOURCE_ACCESS_DENIED("해당 멘티의 자료에 대한 권한이 없습니다."),
+    GENERAL_COMMENT_TOO_LONG("멘토의 총평은 200자를 초과할 수 없습니다."),
+    GENERAL_COMMENT_REQUIRED("최종 저장 시 멘토의 총평은 필수입니다."),
+    PROOF_SHOT_NOT_FOUND("해당 인증 사진을 찾을 수 없습니다."),
+    FEEDBACK_CONTENT_BLANK("피드백 내용이 비어 있습니다.")
 }
