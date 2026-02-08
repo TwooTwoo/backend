@@ -16,7 +16,7 @@ class Task(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val subject: Subject,
+    var subject: Subject,
 
     val date: LocalDate? = null,
 

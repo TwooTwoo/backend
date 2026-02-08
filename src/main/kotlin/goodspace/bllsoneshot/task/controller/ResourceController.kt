@@ -2,6 +2,7 @@ package goodspace.bllsoneshot.task.controller
 
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.task.dto.request.ResourceCreateRequest
+import goodspace.bllsoneshot.task.dto.request.ResourceUpdateRequest
 import goodspace.bllsoneshot.task.dto.response.ResourceResponse
 import goodspace.bllsoneshot.task.dto.response.ResourcesResponse
 import goodspace.bllsoneshot.task.service.ResourceService
@@ -11,8 +12,11 @@ import jakarta.validation.Valid
 import java.security.Principal
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -71,5 +75,49 @@ class ResourceController(
         val mentorId = principal.userId
         val response = resourceService.createResource(mentorId, request)
         return ResponseEntity.ok(response)
+    }
+
+    @PutMapping("/{resourceId}")
+    @Operation(
+        summary = "자료 수정",
+        description = """
+            특정 자료를 수정합니다.
+
+            과목, 자료 이름, 학습 자료(파일 또는 링크)를 변경할 수 있습니다.
+            기존 학습 자료는 제거되고 새로운 자료로 교체됩니다.
+
+            [요청]
+            subject: 과목(KOREAN, ENGLISH, MATH)
+            resourceName: 자료 이름
+            fileId: PDF 파일 ID(선택)
+            columnLink: 칼럼 링크(선택)
+        """
+    )
+    fun updateResource(
+        principal: Principal,
+        @PathVariable resourceId: Long,
+        @Valid @RequestBody request: ResourceUpdateRequest
+    ): ResponseEntity<ResourceResponse> {
+        val mentorId = principal.userId
+        val response = resourceService.updateResource(mentorId, resourceId, request)
+        return ResponseEntity.ok(response)
+    }
+
+    @DeleteMapping("/{resourceId}")
+    @Operation(
+        summary = "자료 삭제",
+        description = """
+            특정 자료를 삭제합니다.
+
+            해당 자료에 연결된 학습 자료(파일 참조, 링크)도 함께 삭제됩니다.
+        """
+    )
+    fun deleteResource(
+        principal: Principal,
+        @PathVariable resourceId: Long
+    ): ResponseEntity<Void> {
+        val mentorId = principal.userId
+        resourceService.deleteResource(mentorId, resourceId)
+        return ResponseEntity.noContent().build()
     }
 }

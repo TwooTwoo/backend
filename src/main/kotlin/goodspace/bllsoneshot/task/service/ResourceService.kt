@@ -8,12 +8,14 @@ import goodspace.bllsoneshot.entity.user.User
 import goodspace.bllsoneshot.entity.user.UserRole
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.FILE_NOT_FOUND
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.RESOURCE_ACCESS_DENIED
+import goodspace.bllsoneshot.global.exception.ExceptionMessage.RESOURCE_NOT_FOUND
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.RESOURCE_SUBJECT_INVALID
 import goodspace.bllsoneshot.global.exception.ExceptionMessage.USER_NOT_FOUND
 import goodspace.bllsoneshot.repository.file.FileRepository
 import goodspace.bllsoneshot.repository.task.TaskRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.task.dto.request.ResourceCreateRequest
+import goodspace.bllsoneshot.task.dto.request.ResourceUpdateRequest
 import goodspace.bllsoneshot.task.dto.response.ResourceResponse
 import goodspace.bllsoneshot.task.dto.response.ResourcesResponse
 import goodspace.bllsoneshot.task.mapper.ResourceMapper
@@ -47,7 +49,7 @@ class ResourceService(
             .orElseThrow { IllegalArgumentException(USER_NOT_FOUND.message) }
 
         validateMentorAccess(mentorId, mentee)
-        validateResourceRequest(request)
+        validateSubject(request.subject)
 
         val resource = Task(
             mentee = mentee,
@@ -73,11 +75,51 @@ class ResourceService(
         return resourceMapper.map(saved)
     }
 
+    @Transactional
+    fun updateResource(mentorId: Long, resourceId: Long, request: ResourceUpdateRequest): ResourceResponse {
+        val resource = findResourceOrThrow(resourceId)
+
+        validateMentorAccess(mentorId, resource.mentee)
+        validateSubject(request.subject)
+
+        resource.subject = request.subject
+        resource.name = request.resourceName
+
+        // 기존 학습 자료를 제거하고, 새로운 자료로 교체
+        resource.worksheets.clear()
+        resource.columnLinks.clear()
+
+        request.fileId?.let { fileId ->
+            val file = fileRepository.findById(fileId)
+                .orElseThrow { IllegalArgumentException(FILE_NOT_FOUND.message) }
+            resource.worksheets.add(Worksheet(resource, file))
+        }
+        request.columnLink
+            ?.takeIf { it.isNotBlank() }
+            ?.let { link -> resource.columnLinks.add(ColumnLink(resource, link)) }
+
+        return resourceMapper.map(resource)
+    }
+
+    @Transactional
+    fun deleteResource(mentorId: Long, resourceId: Long) {
+        val resource = findResourceOrThrow(resourceId)
+
+        validateMentorAccess(mentorId, resource.mentee)
+
+        taskRepository.delete(resource)
+    }
+
+    private fun findResourceOrThrow(resourceId: Long): Task {
+        return taskRepository.findResourceByIdWithMentee(resourceId)
+            ?: throw IllegalArgumentException(RESOURCE_NOT_FOUND.message)
+    }
+
     private fun validateMentorAccess(mentorId: Long, mentee: User) {
         check(mentee.mentor?.id == mentorId) { RESOURCE_ACCESS_DENIED.message }
     }
 
-    private fun validateResourceRequest(request: ResourceCreateRequest) {
-        require(request.subject != Subject.RESOURCE) { RESOURCE_SUBJECT_INVALID.message }
+    private fun validateSubject(subject: Subject) {
+        require(subject != Subject.RESOURCE) { RESOURCE_SUBJECT_INVALID.message }
     }
 }
