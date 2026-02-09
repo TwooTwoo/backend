@@ -1,11 +1,13 @@
 package goodspace.bllsoneshot.report.service
 
 import goodspace.bllsoneshot.entity.assignment.GeneralComment
+import goodspace.bllsoneshot.entity.assignment.NotificationType
 import goodspace.bllsoneshot.entity.assignment.Subject
 import goodspace.bllsoneshot.entity.assignment.Task
 import goodspace.bllsoneshot.entity.user.LearningReport
 import goodspace.bllsoneshot.entity.user.User
 import goodspace.bllsoneshot.global.exception.ExceptionMessage
+import goodspace.bllsoneshot.notification.service.NotificationService
 import goodspace.bllsoneshot.repository.user.LearningReportRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
@@ -29,7 +31,8 @@ class ReportService(
     private val taskRepository: TaskRepository,
     private val reportMapper: ReportMapper,
     private val reportExistsMapper: ReportExistsMapper,
-    private val reportTaskMapper: ReportTaskMapper
+    private val reportTaskMapper: ReportTaskMapper,
+    private val notificationService: NotificationService
 ) {
 
     @Transactional
@@ -51,7 +54,24 @@ class ReportService(
             )
         )
 
+        // 멘티에게 학습 리포트 알림 전송
+        val mentorName = mentee.mentor?.name ?: "멘토"
+        val weekLabel = formatWeekLabel(request.startDate)
+        notificationService.notify(
+            receiver = mentee,
+            type = NotificationType.LEARNING_REPORT,
+            title = "학습 리포트 도착",
+            message = "${mentorName} 멘토의 ${weekLabel} 학습리포트가 도착했어요!",
+            learningReport = report
+        )
+
         return reportMapper.map(report)
+    }
+
+    private fun formatWeekLabel(startDate: LocalDate): String {
+        val month = startDate.monthValue
+        val weekOfMonth = (startDate.dayOfMonth - 1) / 7 + 1
+        return "${month}월 ${weekOfMonth}주차"
     }
 
     @Transactional(readOnly = true)

@@ -40,4 +40,6 @@ class User(
     val reports: MutableList<LearningReport> = mutableListOf()
 
     var refreshToken: String? = null
+
+    var fcmToken: String? = null
 }

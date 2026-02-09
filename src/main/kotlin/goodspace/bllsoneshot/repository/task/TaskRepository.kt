@@ -179,4 +179,51 @@ interface TaskRepository : JpaRepository<Task, Long> {
         """
     )
     fun findResourceByIdWithMentee(resourceId: Long): Task?
+
+    // ── 리마인더 스케줄러용 쿼리 ──────────────────────
+
+    /**
+     * 오늘 할 일 중 ProofShot 미제출 건수를 멘티별로 집계한다.
+     * 반환: List<[menteeId, count]>
+     */
+    @Query(
+        """
+        SELECT t.mentee.id, COUNT(t)
+        FROM Task t
+        LEFT JOIN t.proofShots ps
+        WHERE t.date = :date
+        AND t.isResource = false
+        AND ps.id IS NULL
+        GROUP BY t.mentee.id
+        """
+    )
+    fun countUnfinishedTasksByMentee(date: LocalDate): List<Array<Any>>
+
+    /**
+     * 오늘 ProofShot은 제출되었지만 확정 피드백이 없는 할 일 건수를 멘토별로 집계한다.
+     * 반환: List<[mentorId, count]>
+     */
+    @Query(
+        """
+        SELECT m.mentor.id, COUNT(DISTINCT t.id)
+        FROM Task t
+        JOIN t.mentee m
+        JOIN t.proofShots ps
+        WHERE t.date = :date
+        AND t.isResource = false
+        AND m.mentor IS NOT NULL
+        AND NOT EXISTS (
+            SELECT c FROM Comment c
+            WHERE c.task = t
+            AND c.type = :feedbackType
+            AND c.registerStatus = :confirmedStatus
+        )
+        GROUP BY m.mentor.id
+        """
+    )
+    fun countFeedbackPendingTasksByMentor(
+        date: LocalDate,
+        feedbackType: CommentType,
+        confirmedStatus: RegisterStatus
+    ): List<Array<Any>>
 }
