@@ -27,10 +27,14 @@ interface TaskRepository : JpaRepository<Task, Long> {
         SELECT t FROM Task t
         WHERE t.mentee.id = :menteeId
         AND t.date BETWEEN :startDate AND :endDate
+        AND t.subject = :subject
+        AND t.isResource = false
+        ORDER BY t.date ASC
         """
     )
     fun findDateBetweenTasks(
         menteeId: Long,
+        subject: Subject,
         startDate: LocalDate,
         endDate: LocalDate
     ): List<Task>

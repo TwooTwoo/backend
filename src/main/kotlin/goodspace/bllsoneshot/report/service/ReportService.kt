@@ -82,8 +82,12 @@ class ReportService(
             date = date
         ) ?: throw IllegalArgumentException(ExceptionMessage.REPORT_NOT_FOUND.message)
 
-        val tasks = taskRepository.findDateBetweenTasks(menteeId, report.startDate, report.endDate)
-            .filter { it.subject == report.subject }
+        val tasks = taskRepository.findDateBetweenTasks(
+            menteeId = menteeId,
+            subject = report.subject,
+            startDate = report.startDate,
+            endDate = report.endDate
+        )
 
         return reportTaskMapper.map(report, tasks)
     }
