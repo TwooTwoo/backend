@@ -15,7 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.security.Principal
 
-@Tag(name = "Mentor Task", description = "멘토 - 할 일 관리")
+@Tag(name = "멘토 할일 및 피드백", description = "멘토의 할 일 관리 및 피드백 관리 API")
 @RestController
 @RequestMapping("/mentors/tasks")
 @PreAuthorize("hasRole('MENTOR')")
@@ -42,8 +42,8 @@ class MentorTaskController(
             proofShots: 인증 사진 목록
                 proofShots.questions: 멘티의 질문 목록
                 proofShots.feedbacks: 최종 저장된(CONFIRMED) 피드백만 포함 (임시저장 제외)
-            generalComment: 멘토의 총평, 멘토가 아직 작성하지 않았을 경우 null
-            subject: 과목(안써도됨)
+            generalComment: 멘토의 총평 (미작성 시 null)
+            subject: 과목 (KOREAN, ENGLISH, MATH)
         """
     )
     fun getTaskDetail(
@@ -106,7 +106,7 @@ class MentorTaskController(
                 proofShots.questions: 멘티의 질문 목록
                 proofShots.feedbacks: TEMPORARY 상태의 피드백만 포함
             generalComment: 임시저장된 총평 (temporaryContent)
-            subject: 과목(안써도됨)
+            subject: 과목 (KOREAN, ENGLISH, MATH)
         """
     )
     fun getTemporaryFeedback(
@@ -219,11 +219,11 @@ class MentorTaskController(
         summary = "멘토 할 일 삭제",
         description = """
             멘토가 본인이 등록한 할 일을 삭제합니다.
-            멘토가 등록한 할 일(createdBy = ROLE_MENTOR)만 삭제할 수 있습니다.
+            멘토가 등록한 할 일만 삭제할 수 있습니다.
             멘티가 등록한 할 일은 삭제할 수 없습니다.
             
             [요청]
-            taskId
+            taskId: 할 일 ID (Path)
             
             [응답]
             204 NO CONTENT

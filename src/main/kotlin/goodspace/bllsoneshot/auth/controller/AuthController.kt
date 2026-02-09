@@ -32,11 +32,15 @@ class AuthController(
         summary = "로그인",
         description = """
             아이디와 비밀번호를 기반으로 로그인합니다.
-            멘토 회원인지 멘티 회원인지 정보를 같이 제공합니다.
+            리프레시 토큰은 쿠키에 저장됩니다.
             
-            리프레쉬 토큰은 쿠키에 저장됩니다.
+            [요청]
+            loginId: 로그인 아이디
+            password: 비밀번호
             
-            role: ROLE_MENTOR, ROLE_MENTEE
+            [응답]
+            accessToken: 액세스 토큰
+            role: 사용자 역할 (ROLE_MENTOR, ROLE_MENTEE)
         """
     )
     fun login(
@@ -65,6 +69,10 @@ class AuthController(
         description = """
             쿠키에 저장된 리프레시 토큰으로 새 액세스 토큰을 발급합니다.
             로그인 시 설정된 refreshToken 쿠키가 요청에 포함되어야 합니다.
+            
+            [응답]
+            accessToken: 새로 발급된 액세스 토큰
+            role: 사용자 역할 (ROLE_MENTOR, ROLE_MENTEE)
         """
     )
     fun refresh(

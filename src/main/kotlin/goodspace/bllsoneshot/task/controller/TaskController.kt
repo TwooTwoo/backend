@@ -144,14 +144,20 @@ class TaskController(
     @Operation(
         summary = "할 일 추가(멘토)",
         description = """
+            멘토가 담당 멘티에게 할 일을 추가합니다.
             dates × taskNames 조합만큼 할 일이 생성됩니다.
-
-            [dates]
-            "기간으로 받기" 사용 시 프론트에서 시작일~종료일 사이 날짜를 펼쳐서 배열로 보내주세요.
-            예) 02-07 ~ 02-09 → dates: ["2026-02-07", "2026-02-08", "2026-02-09"]
-
-            [taskNames]
-            할 일 이름 배열 (최소 1개, 각 최대 50자)
+            
+            [요청]
+            menteeId: 멘티 ID
+            subject: 과목 (KOREAN, ENGLISH, MATH)
+            dates: 날짜 배열 (시작일~종료일 사이를 펼쳐서 전달)
+            taskNames: 할 일 이름 배열 (최소 1개, 각 최대 50자)
+            goalMinutes: 목표 시간 (분, 0 이상)
+            worksheets: 학습 자료 목록 (선택)
+            columnLinks: 칼럼 링크 목록 (선택)
+            
+            [응답]
+            생성된 할 일 목록
         """
     )
     fun addTaskByMentor(
@@ -169,8 +175,16 @@ class TaskController(
     @Operation(
         summary = "할 일 추가(멘티)",
         description = """
-            멘티 권한으로 할 일을 추가합니다.
-            생성된 할 일에 대한 정보를 응답합니다.
+            멘티가 본인의 할 일을 추가합니다.
+
+            [요청]
+            subject: 과목 (KOREAN, ENGLISH, MATH)
+            date: 날짜 (yyyy-MM-dd)
+            taskName: 할 일 이름 (최대 50자)
+            goalMinutes: 목표 시간 (분, 0 이상)
+            
+            [응답]
+            생성된 할 일 정보
         """
     )
     fun addTaskByMentee(
@@ -188,15 +202,16 @@ class TaskController(
     @Operation(
         summary = "할 일 수정(멘티)",
         description = """
-            할 일을 수정합니다.
-            
-            본인의 할 일에 대해서만 호출할 수 있습니다.
-            멘티에 의해 만들어진 할 일에 대해서만 호출할 수 있습니다.
-            피드백이 달린 할 일에 대해서도 호출할 수 있습니다.
+            멘티가 본인이 등록한 할 일을 수정합니다.
+            멘토가 등록한 할 일은 수정할 수 없습니다.
             
             [요청]
-            taskName: 할 일의 이름입니다. 비어 있을 수 없습니다.
-            goalMinutes: 목표 시간(분)입니다. 0 이상이어야 합니다.
+            taskId: 할 일 ID (Path)
+            taskName: 할 일 이름 (필수, 최대 50자)
+            goalMinutes: 목표 시간 (분, 0 이상)
+            
+            [응답]
+            204 NO CONTENT
         """
     )
     fun updateTaskByMentee(
@@ -216,8 +231,19 @@ class TaskController(
         summary = "할 일 상세조회(바텀시트)",
         description = """
             할 일의 상세 정보를 조회합니다.
-            
             본인의 할 일만 조회할 수 있습니다.
+            
+            [요청]
+            taskId: 할 일 ID (Path)
+            
+            [응답]
+            taskId: 할 일 ID
+            taskName: 할 일 이름
+            subject: 과목
+            goalMinutes: 목표 시간 (분)
+            completed: 완료 여부
+            worksheets: 학습 자료 목록
+            columnLinks: 칼럼 링크 목록
         """
     )
     fun getTaskDetails(
@@ -236,17 +262,19 @@ class TaskController(
         summary = "할 일 제출 정보 조회",
         description = """
             할 일에 대한 제출 정보를 조회합니다.
-            응답의 proofShots 구조를 그대로 수정하여 PUT /tasks/{taskId} 요청 본문으로 사용할 수 있습니다.
-            
+            응답의 proofShots 구조를 그대로 수정하여 PUT /tasks/{taskId}/submit 요청 본문으로 사용할 수 있습니다.
             이미 멘토가 피드백을 남긴 할 일은 조회할 수 없습니다.
-
+            
+            [요청]
+            taskId: 할 일 ID (Path)
+            
             [응답]
             taskId: 할 일 ID
             name: 할 일 이름
-            subject: 과목(KOREAN, ENGLISH, MATH, RESOURCE)
+            subject: 과목 (KOREAN, ENGLISH, MATH)
             proofShots: 인증 사진 목록
-            percentX: 주석이 이미지 좌측에서부터 몇 % 떨어진 곳에 있는지 수치
-            percentY: 주석이 이미지 상단에서부터 몇 % 떨어진 곳에 있는지 수치
+                percentX: 주석 X 위치 (이미지 좌측 기준 %)
+                percentY: 주석 Y 위치 (이미지 상단 기준 %)
         """
     )
     fun getTaskForSubmit(
@@ -265,16 +293,21 @@ class TaskController(
         summary = "할 일 제출",
         description = """
             할 일에 인증 사진과 질문을 제출합니다.
-            기존의 인증 사진과 질문은 제거됩니다.
+            기존의 인증 사진과 질문은 제거되고 새로 교체됩니다.
+            이미 멘토가 피드백을 남긴 할 일에 대해서는 호출할 수 없습니다.
+            질문 번호는 리스트 순서대로 1부터 배정됩니다.
             
-            이미 멘토가 피드백(총평 제외)을 남긴 할 일에 대해서는 호출할 수 없습니다.
-            
-            질문의 번호는 리스트의 순서대로 배정됩니다.
-            (1부터 시작하는 오름차순)
+            [요청]
+            taskId: 할 일 ID (Path)
+            proofShots: 인증 사진 목록
+                imageFileId: 이미지 파일 ID
+                questions: 질문 목록
+                    content: 질문 내용
+                    percentX: 주석 X 위치 (이미지 좌측 기준 %)
+                    percentY: 주석 Y 위치 (이미지 상단 기준 %)
             
             [응답]
-            percentX: 주석이 이미지 좌측에서부터 몇 % 떨어진 곳에 있는지 수치
-            percentY: 주석이 이미지 상단에서부터 몇 % 떨어진 곳에 있는지 수치
+            204 NO CONTENT
         """
     )
     fun submitTask(
@@ -293,19 +326,21 @@ class TaskController(
     @Operation(
         summary = "피드백 조회",
         description = """
-            ID를 기반으로 할 일의 피드백 정보를 조회합니다.
-            본인의 할 일에 대한 피드백만 조회할 수 있으며, 임시 저장 상태(TEMPORARY)인 피드백은 조회되지 않습니다.
+            할 일의 피드백 정보를 조회합니다.
+            본인의 할 일에 대한 피드백만 조회할 수 있습니다.
+            임시 저장 상태(TEMPORARY)인 피드백은 조회되지 않습니다.
             피드백이 있는 할 일에 대해서만 호출할 수 있습니다.
-
-            [null 가능 속성]
-            answer: 멘티 답변 미작성 시 null
+            
+            [요청]
+            taskId: 할 일 ID (Path)
             
             [응답]
-            starred: 해당 피드백이 중요하다고 표시되었는지 여부
-            annotation: 이미지 위에 표시되는 주석
-            percentX: 주석이 이미지 좌측에서부터 몇 % 떨어진 곳에 있는지 수치
-            percentY: 주석이 이미지 상단에서부터 몇 % 떨어진 곳에 있는지 수치
-            registerStatus: 피드백 저장 상태(TEMPORARY, CONFIRMED)
+            starred: 중요 표시 여부
+            annotation: 이미지 주석 정보
+                percentX: 주석 X 위치 (이미지 좌측 기준 %)
+                percentY: 주석 Y 위치 (이미지 상단 기준 %)
+            registerStatus: 피드백 저장 상태 (CONFIRMED)
+            answer: 멘티 답변 (미작성 시 null)
         """
     )
     fun getTaskFeedback(
@@ -323,14 +358,17 @@ class TaskController(
     @Operation(
         summary = "할 일 완료",
         description = """
-            할 일을 완료합니다.
-            
-            미래의 할 일에 대해선 호출할 수 없습니다.
+            할 일을 완료 처리합니다.
             본인의 할 일에 대해서만 호출할 수 있습니다.
+            미래의 할 일은 완료할 수 없습니다.
             
             [요청]
-            currentDate: 현재 날짜(yyyy-MM-dd)
-            actualMinutes: 학습 시간(분, 0 이상)
+            taskId: 할 일 ID (Path)
+            currentDate: 현재 날짜 (yyyy-MM-dd)
+            actualMinutes: 실제 학습 시간 (분, 0 이상)
+            
+            [응답]
+            204 NO CONTENT
         """
     )
     fun updateCompleted(
@@ -349,10 +387,14 @@ class TaskController(
     @Operation(
         summary = "할 일 삭제(멘티)",
         description = """
-            할 일을 삭제합니다.
+            멘티가 본인이 등록한 할 일을 삭제합니다.
+            멘토가 등록한 할 일은 삭제할 수 없습니다.
             
-            멘티가 만든 할 일만 삭제할 수 있습니다.
-            본인의 할 일만 삭제할 수 있습니다.
+            [요청]
+            taskId: 할 일 ID (Path)
+            
+            [응답]
+            204 NO CONTENT
         """
     )
     fun deleteTaskByMentee(

@@ -35,14 +35,21 @@ class ReportController(
     @Operation(
         summary = "학습 리포트 발행",
         description = """
-            학습 리포트를 새로 생성합니다.
-            
-            담당 멘티의 학습 리포트만 생성할 수 있습니다.
-            시작일/종료일/과목이 같은 학습 리포트는, 한 멘티에 여럿 생성할 수 없습니다.
-            총평, 잘한 점, 보완할 점은 최소 1개 이상 존재해야 하며, 공백일 수 없습니다.
+            담당 멘티의 학습 리포트를 새로 생성합니다.
+            시작일/종료일/과목이 같은 학습 리포트는 한 멘티에 중복 생성할 수 없습니다.
+            총평, 잘한 점, 보완할 점은 최소 1개 이상이며 공백일 수 없습니다.
             
             [요청]
-            subject: 과목(KOREAN, ENGLISH, MATH)
+            menteeId: 멘티 ID (Path)
+            subject: 과목 (KOREAN, ENGLISH, MATH)
+            startDate: 리포트 시작일 (yyyy-MM-dd)
+            endDate: 리포트 종료일 (yyyy-MM-dd)
+            generalComment: 총평
+            goodPoints: 잘한 점 목록
+            badPoints: 보완할 점 목록
+            
+            [응답]
+            subject: 과목
             startDate: 리포트 시작일
             endDate: 리포트 종료일
             generalComment: 총평

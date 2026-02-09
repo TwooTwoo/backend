@@ -20,7 +20,7 @@ import java.security.Principal
 
 @RestController
 @RequestMapping("/notifications")
-@Tag(name = "알림", description = "알림 관련 API")
+@Tag(name = "알림 API")
 class NotificationController(
     private val notificationService: NotificationService
 ) {

@@ -32,7 +32,13 @@ class MyPageController(
         summary = "내 정보 조회",
         description = """
             본인의 정보를 조회합니다.
-            프로필 이미지(PNG)는 Base64 인코딩된 문자열로 반환됩니다. 없으면 null입니다.
+            
+            [응답]
+            name: 이름
+            loginId: 로그인 아이디
+            role: 사용자 역할 (ROLE_MENTOR, ROLE_MENTEE)
+            grade: 학년 (멘티만 해당, 없으면 null)
+            profileImage: 프로필 이미지 (Base64 인코딩, 없으면 null)
         """
     )
     fun getMyInfo(principal: Principal): ResponseEntity<UserInfoResponse> {

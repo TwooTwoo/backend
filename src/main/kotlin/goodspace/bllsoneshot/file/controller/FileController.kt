@@ -6,11 +6,13 @@ import goodspace.bllsoneshot.file.dto.FileUploadResponse
 import goodspace.bllsoneshot.file.service.FileService
 import goodspace.bllsoneshot.global.response.NO_CONTENT
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
+@Tag(name = "파일 관리 API")
 @RestController
 @RequestMapping("/files")
 class FileController(

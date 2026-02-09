@@ -91,10 +91,13 @@ class ResourceController(
 
             [요청]
             menteeId: 멘티 ID
-            subject: 과목(KOREAN, ENGLISH, MATH)
+            subject: 과목 (KOREAN, ENGLISH, MATH)
             resourceName: 자료 이름
-            fileId: PDF 파일 ID(선택)
-            columnLink: 칼럼 링크(선택)
+            fileId: PDF 파일 ID (선택)
+            columnLink: 칼럼 링크 (선택)
+            
+            [응답]
+            생성된 자료 정보
         """
     )
     fun createResource(
@@ -111,15 +114,17 @@ class ResourceController(
         summary = "자료 수정",
         description = """
             특정 자료를 수정합니다.
-
-            과목, 자료 이름, 학습 자료(파일 또는 링크)를 변경할 수 있습니다.
             기존 학습 자료는 제거되고 새로운 자료로 교체됩니다.
 
             [요청]
-            subject: 과목(KOREAN, ENGLISH, MATH)
+            resourceId: 자료 ID (Path)
+            subject: 과목 (KOREAN, ENGLISH, MATH)
             resourceName: 자료 이름
-            fileId: PDF 파일 ID(선택)
-            columnLink: 칼럼 링크(선택)
+            fileId: PDF 파일 ID (선택)
+            columnLink: 칼럼 링크 (선택)
+            
+            [응답]
+            수정된 자료 정보
         """
     )
     fun updateResource(
@@ -137,8 +142,13 @@ class ResourceController(
         summary = "자료 삭제",
         description = """
             특정 자료를 삭제합니다.
-
             해당 자료에 연결된 학습 자료(파일 참조, 링크)도 함께 삭제됩니다.
+            
+            [요청]
+            resourceId: 자료 ID (Path)
+            
+            [응답]
+            204 NO CONTENT
         """
     )
     fun deleteResource(
