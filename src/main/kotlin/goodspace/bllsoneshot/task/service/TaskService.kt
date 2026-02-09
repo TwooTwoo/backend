@@ -46,20 +46,25 @@ class TaskService(
     }
 
     @Transactional(readOnly = true)
-    fun findTasksOfMentee(
-        mentorId: Long,
-        menteeId: Long,
+    fun findTasksByDuration(
+        userId: Long,
+        menteeId: Long?,
+        subject: Subject,
         startDate: LocalDate,
         endDate: LocalDate
     ): List<TaskByDateResponse> {
-        val mentee = userRepository.findById(menteeId)
+        val targetMenteeId = menteeId ?: userId
+
+        val mentee = userRepository.findById(targetMenteeId)
             .orElseThrow { IllegalArgumentException(USER_NOT_FOUND.message) }
 
-        validateAssignedMentee(mentorId, mentee)
+        if (menteeId != null) {
+            validateAssignedMentee(userId, mentee)
+        }
 
-        // TODO: 나중에 task.isResources로 필터링하도록 수정
         val tasks = taskRepository.findDateBetweenTasks(
-            menteeId = menteeId,
+            menteeId = targetMenteeId,
+            subject = subject,
             startDate = startDate,
             endDate = endDate
         )
