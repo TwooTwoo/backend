@@ -3,7 +3,6 @@ package goodspace.bllsoneshot.report.service
 import goodspace.bllsoneshot.entity.assignment.GeneralComment
 import goodspace.bllsoneshot.entity.assignment.NotificationType
 import goodspace.bllsoneshot.entity.assignment.Subject
-import goodspace.bllsoneshot.entity.assignment.Task
 import goodspace.bllsoneshot.entity.user.LearningReport
 import goodspace.bllsoneshot.entity.user.User
 import goodspace.bllsoneshot.global.exception.ExceptionMessage
@@ -11,12 +10,8 @@ import goodspace.bllsoneshot.notification.service.NotificationService
 import goodspace.bllsoneshot.repository.user.LearningReportRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
-import goodspace.bllsoneshot.report.dto.response.ReportAmountResponse
-import goodspace.bllsoneshot.report.dto.response.ReportExistResponse
-import goodspace.bllsoneshot.report.dto.response.ReportExistsResponse
 import goodspace.bllsoneshot.report.dto.response.ReportResponse
 import goodspace.bllsoneshot.report.dto.response.ReportTaskResponse
-import goodspace.bllsoneshot.report.mapper.ReportExistsMapper
 import goodspace.bllsoneshot.report.mapper.ReportMapper
 import goodspace.bllsoneshot.report.mapper.ReportTaskMapper
 import goodspace.bllsoneshot.repository.task.TaskRepository
@@ -30,9 +25,8 @@ class ReportService(
     private val learningReportRepository: LearningReportRepository,
     private val taskRepository: TaskRepository,
     private val reportMapper: ReportMapper,
-    private val reportExistsMapper: ReportExistsMapper,
-    private val reportTaskMapper: ReportTaskMapper,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val reportTaskMapper: ReportTaskMapper
 ) {
 
     @Transactional
@@ -75,27 +69,6 @@ class ReportService(
     }
 
     @Transactional(readOnly = true)
-    fun getReportExists(
-        mentorId: Long,
-        menteeId: Long,
-        startDate: LocalDate,
-        endDate: LocalDate
-    ): List<ReportExistsResponse> {
-        val mentee = findUserBy(menteeId)
-        validateAssignedMentee(mentorId, mentee)
-
-        return Subject.entriesExcludeResource()
-            .map {
-                reportExistsMapper.map(
-                    menteeId = menteeId,
-                    subject = it,
-                    startDate = startDate,
-                    endDate = endDate
-                )
-            }
-    }
-
-    @Transactional(readOnly = true)
     fun getReport(
         mentorId: Long,
         menteeId: Long,
@@ -129,25 +102,14 @@ class ReportService(
             date = date
         ) ?: throw IllegalArgumentException(ExceptionMessage.REPORT_NOT_FOUND.message)
 
-        // TODO: 자료가 아닌 할 일만 조회하도록 수정.
-        val tasks = taskRepository.findDateBetweenTasks(menteeId, report.startDate, report.endDate)
-            .filter { it.subject == report.subject }
+        val tasks = taskRepository.findDateBetweenTasks(
+            menteeId = menteeId,
+            subject = report.subject,
+            startDate = report.startDate,
+            endDate = report.endDate
+        )
 
         return reportTaskMapper.map(report, tasks)
-    }
-
-    @Transactional(readOnly = true)
-    fun getReceivedReportAmount(menteeId: Long, date: LocalDate): ReportAmountResponse {
-        val count = learningReportRepository.countByMenteeIdAndDate(menteeId, date)
-
-        return ReportAmountResponse(amount = count.toInt())
-    }
-
-    @Transactional(readOnly = true)
-    fun getReportExistSubjects(menteeId: Long, date: LocalDate): ReportExistResponse {
-        val subjects = learningReportRepository.findSubjectsByMenteeIdAndDate(menteeId, date)
-
-        return ReportExistResponse(subjects = subjects)
     }
 
     private fun findUserBy(userId: Long): User {

@@ -3,9 +3,6 @@ package goodspace.bllsoneshot.report.controller
 import goodspace.bllsoneshot.entity.assignment.Subject
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.report.dto.request.ReportCreateRequest
-import goodspace.bllsoneshot.report.dto.response.ReportAmountResponse
-import goodspace.bllsoneshot.report.dto.response.ReportExistResponse
-import goodspace.bllsoneshot.report.dto.response.ReportExistsResponse
 import goodspace.bllsoneshot.report.dto.response.ReportResponse
 import goodspace.bllsoneshot.report.dto.response.ReportTaskResponse
 import goodspace.bllsoneshot.report.service.ReportService
@@ -14,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import java.security.Principal
 import java.time.LocalDate
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -66,33 +63,6 @@ class ReportController(
             .body(response)
     }
 
-    @GetMapping("/mentee/{menteeId}/subjects")
-    @Operation(
-        summary = "학습 리포트 존재 여부 조회",
-        description = """
-            과목별로, 이미 학습 리포트가 작성되었는지 여부를 조회합니다.
-            
-            [요청]
-            startDate: 리포트 시작일(yyyy-MM-dd)
-            endDate: 리포트 종료일(yyyy-MM-dd)
-            
-            [응답]
-            subject: 과목(KOREAN, ENGLISH, MATH)
-        """
-    )
-    fun getReportExists(
-        principal: Principal,
-        @PathVariable menteeId: Long,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
-    ): ResponseEntity<List<ReportExistsResponse>> {
-        val mentorId = principal.userId
-
-        val response = reportService.getReportExists(mentorId, menteeId, startDate, endDate)
-
-        return ResponseEntity.ok(response)
-    }
-
     @GetMapping("mentee/{menteeId}/subjects/{subject}")
     @Operation(
         summary = "학습 리포트 조회(멘토)",
@@ -125,50 +95,6 @@ class ReportController(
         val mentorId = principal.userId
 
         val response = reportService.getReport(mentorId, menteeId, subject, startDate, endDate)
-
-        return ResponseEntity.ok(response)
-    }
-
-    @GetMapping("/mentee/me/amount")
-    @Operation(
-        summary = "학습 리포트 개수 조회(멘티)",
-        description = """
-            멘토가 본인(멘티)에게 작성해준 학습 리포트의 개수를 조회합니다.
-            날짜에 해당하는 학습 리포트를 조회합니다.
-            
-            [요청]
-            date: 날짜(yyyy-MM-dd)
-        """
-    )
-    fun getReceivedReportAmount(
-        principal: Principal,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate
-    ): ResponseEntity<ReportAmountResponse> {
-        val menteeId = principal.userId
-
-        val response = reportService.getReceivedReportAmount(menteeId, date)
-
-        return ResponseEntity.ok(response)
-    }
-
-    @GetMapping("/mentee/me")
-    @Operation(
-        summary = "학습 리포트가 있는 과목 조회(멘티)",
-        description = """
-            학습 리포트가 존재하는 과목의 목록을 응답합니다.
-            날짜에 해당하는 학습 리포트를 조회합니다.
-            
-            [요청]
-            date: 날짜(yyyy-MM-dd)
-        """
-    )
-    fun getReportExistResources(
-        principal: Principal,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate
-    ): ResponseEntity<ReportExistResponse> {
-        val menteeId = principal.userId
-
-        val response = reportService.getReportExistSubjects(menteeId, date)
 
         return ResponseEntity.ok(response)
     }

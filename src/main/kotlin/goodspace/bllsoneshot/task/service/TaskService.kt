@@ -8,6 +8,7 @@ import goodspace.bllsoneshot.repository.file.FileRepository
 import goodspace.bllsoneshot.repository.task.TaskRepository
 import goodspace.bllsoneshot.repository.user.UserRepository
 import goodspace.bllsoneshot.task.dto.request.*
+import goodspace.bllsoneshot.task.dto.response.task.TaskAmountResponse
 import goodspace.bllsoneshot.task.dto.response.task.TaskByDateResponse
 import goodspace.bllsoneshot.task.dto.response.task.TaskDetailResponse
 import goodspace.bllsoneshot.task.dto.response.submit.TaskSubmitResponse
@@ -38,33 +39,54 @@ class TaskService(
     @Transactional(readOnly = true)
     fun findTasksByDate(
         userId: Long,
+        includeResources: Boolean,
         date: LocalDate
     ): TasksResponse {
-        val tasks = taskRepository.findCurrentTasks(userId, date)
+        val tasks = if (includeResources) {
+            taskRepository.findCurrentTasksIncludeResource(userId, date)
+        } else {
+            taskRepository.findCurrentTasks(userId, date)
+        }
 
         return tasksMapper.map(tasks)
     }
 
     @Transactional(readOnly = true)
-    fun findTasksOfMentee(
-        mentorId: Long,
-        menteeId: Long,
+    fun findTasksByDuration(
+        userId: Long,
+        menteeId: Long?,
+        subject: Subject,
         startDate: LocalDate,
         endDate: LocalDate
     ): List<TaskByDateResponse> {
-        val mentee = userRepository.findById(menteeId)
+        val targetMenteeId = menteeId ?: userId
+
+        val mentee = userRepository.findById(targetMenteeId)
             .orElseThrow { IllegalArgumentException(USER_NOT_FOUND.message) }
 
-        validateAssignedMentee(mentorId, mentee)
+        if (menteeId != null) {
+            validateAssignedMentee(userId, mentee)
+        }
 
-        // TODO: 나중에 task.isResources로 필터링하도록 수정
         val tasks = taskRepository.findDateBetweenTasks(
-            menteeId = menteeId,
+            menteeId = targetMenteeId,
+            subject = subject,
             startDate = startDate,
             endDate = endDate
         )
 
         return taskMapper.mapByDate(tasks)
+    }
+
+    @Transactional(readOnly = true)
+    fun findTaskAmounts(
+        userId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<TaskAmountResponse> {
+        val tasks = taskRepository.findTaskAmountsByDateRange(userId, startDate, endDate)
+
+        return taskMapper.mapToTaskAmounts(tasks)
     }
 
     @Transactional
@@ -142,7 +164,7 @@ class TaskService(
         validateTaskOwnership(task, userId)
         validateTaskSubmittable(task)
 
-        removeExistingProofShotsAndComments(task)
+        removeExistingProofShots(task)
         createProofShotsAndQuestions(task, request.proofShots)
 
         taskRepository.save(task)
@@ -254,8 +276,7 @@ class TaskService(
     }
 
 
-    private fun removeExistingProofShotsAndComments(task: Task) {
-        task.comments.clear()
+    private fun removeExistingProofShots(task: Task) {
         task.proofShots.clear()
     }
 
@@ -272,7 +293,6 @@ class TaskService(
                     percentY = question.percentY
                 )
                 val comment = Comment(
-                    task = task,
                     proofShot = proofShot,
                     annotation = annotation,
                     content = question.content,
@@ -281,7 +301,6 @@ class TaskService(
                 )
 
                 proofShot.comments.add(comment)
-                task.comments.add(comment)
             }
 
             task.proofShots.add(proofShot)

@@ -1,5 +1,6 @@
 package goodspace.bllsoneshot.task.controller
 
+import goodspace.bllsoneshot.entity.assignment.Subject
 import goodspace.bllsoneshot.global.response.NO_CONTENT
 import goodspace.bllsoneshot.global.security.userId
 import goodspace.bllsoneshot.task.dto.request.MenteeTaskCreateRequest
@@ -13,6 +14,7 @@ import goodspace.bllsoneshot.task.dto.response.task.TaskResponse
 import goodspace.bllsoneshot.task.dto.response.task.TasksResponse
 import goodspace.bllsoneshot.task.dto.response.feedback.TaskFeedbackResponse
 import goodspace.bllsoneshot.task.dto.response.submit.TaskSubmitResponse
+import goodspace.bllsoneshot.task.dto.response.task.TaskAmountResponse
 import goodspace.bllsoneshot.task.service.TaskService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -49,6 +51,7 @@ class TaskController(
 
             [요청]
             date: 조회할 날짜(yyyy-MM-dd)
+            includeResources: 자료도 포함해 조회할지 여부(기본값 false)
 
             [응답]
             createdBy: 할 일을 만든 사람(ROLE_MENTOR / ROLE_MENTEE)
@@ -57,25 +60,62 @@ class TaskController(
     )
     fun getDailyTasks(
         principal: Principal,
+        @RequestParam(defaultValue = "false")
+        includeResources: Boolean,
         @RequestParam
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         date: LocalDate
     ): ResponseEntity<TasksResponse> {
         val userId = principal.userId
 
-        val response = taskService.findTasksByDate(userId, date)
+        val response = taskService.findTasksByDate(userId, includeResources, date)
 
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/mentee/{menteeId}")
+    @GetMapping("/duration")
     @Operation(
-        summary = "멘티의 할 일 목록 조회(기간 조회)",
+        summary = "할 일 목록 조회(기간 조회)",
         description = """
-            해당 기간 내의 할 일을 조회합니다.
+            해당 기간 내의 할 일을 조회합니다.(전달한 과목에 대해서만 조회합니다)
             
-            담당 멘티에 대해서만 호출할 수 있습니다.
-            자료는 조회하지 않습니다.
+            본인 혹은 담당 멘티에 대해서만 호출할 수 있습니다.(menteeId를 전달하지 않는다면, 본인의 할 일을 조회합니다)
+            
+            DTO는 날짜 순서대로 정렬됩니다.
+
+            [요청]
+            startDate: 조회 시작 날짜(yyyy-MM-dd)
+            endDate: 조회 종료 날짜(yyyy-MM-dd)
+            subject: 과목(KOREAN, ENGLISH, MATH)
+
+            [응답]
+            date: 할 일의 날짜(yyyy-MM-dd)
+            createdBy: 할 일을 만든 사람(ROLE_MENTOR / ROLE_MENTEE)
+            subject: 과목(KOREAN, ENGLISH, MATH)
+        """
+    )
+    fun getTasksByDuration(
+        principal: Principal,
+        @RequestParam(required = false) menteeId: Long?,
+        @RequestParam subject: Subject,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
+    ): ResponseEntity<List<TaskByDateResponse>> {
+        val userId = principal.userId
+
+        val response = taskService.findTasksByDuration(userId, menteeId, subject, startDate, endDate)
+
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/duration/amount")
+    @Operation(
+        summary = "할 일 개수 조회(월간 캘린더)",
+        description = """
+            해당 기간 내의 완료되지 않은 날짜별 할 일 개수를 조회합니다.
+            자료(RESOURCE)의 개수는 포함하지 않습니다.
+            
+            본인에 대해서만 호출할 수 있습니다.
             
             DTO는 날짜 순서대로 정렬됩니다.
 
@@ -85,19 +125,17 @@ class TaskController(
 
             [응답]
             date: 할 일의 날짜(yyyy-MM-dd)
-            createdBy: 할 일을 만든 사람(ROLE_MENTOR / ROLE_MENTEE)
-            subject: 과목(KOREAN, ENGLISH, MATH)
+            taskAmount: 할 일의 개수
         """
     )
-    fun getTasksOfMentee(
+    fun getTaskAmounts(
         principal: Principal,
-        @PathVariable menteeId: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
-    ): ResponseEntity<List<TaskByDateResponse>> {
-        val mentorId = principal.userId
+    ): ResponseEntity<List<TaskAmountResponse>> {
+        val userId = principal.userId
 
-        val response = taskService.findTasksOfMentee(mentorId, menteeId, startDate, endDate)
+        val response = taskService.findTaskAmounts(userId, startDate, endDate)
 
         return ResponseEntity.ok(response)
     }

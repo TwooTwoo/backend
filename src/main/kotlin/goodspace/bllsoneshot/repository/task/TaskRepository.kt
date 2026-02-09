@@ -26,12 +26,26 @@ interface TaskRepository : JpaRepository<Task, Long> {
     @Query(
         """
         SELECT t FROM Task t
+        WHERE t.mentee.id = :userId
+        AND t.date = :date
+        AND t.isResource = true
+        """
+    )
+    fun findCurrentTasksIncludeResource(userId: Long, date: LocalDate): List<Task>
+
+    @Query(
+        """
+        SELECT t FROM Task t
         WHERE t.mentee.id = :menteeId
         AND t.date BETWEEN :startDate AND :endDate
+        AND t.subject = :subject
+        AND t.isResource = false
+        ORDER BY t.date ASC
         """
     )
     fun findDateBetweenTasks(
         menteeId: Long,
+        subject: Subject,
         startDate: LocalDate,
         endDate: LocalDate
     ): List<Task>
@@ -83,7 +97,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
         AND NOT EXISTS (
             SELECT c 
             FROM Comment c
-            WHERE c.task = t
+            JOIN c.proofShot ps
+            WHERE ps.task = t
               AND c.type = :feedbackType
               AND c.registerStatus = :confirmedStatus
         )
@@ -201,4 +216,20 @@ interface TaskRepository : JpaRepository<Task, Long> {
     )
     fun countUnfinishedTasksByMentee(date: LocalDate): List<UnfinishedTaskCountResponse>
 
+
+    @Query(
+        """
+        SELECT t FROM Task t
+        WHERE t.mentee.id = :userId
+        AND t.date BETWEEN :startDate AND :endDate
+        AND t.isResource = false
+        AND t.completed = false
+        ORDER BY t.date ASC
+        """
+    )
+    fun findTaskAmountsByDateRange(
+        userId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<Task>
 }
